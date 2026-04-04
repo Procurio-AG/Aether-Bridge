@@ -1,0 +1,13 @@
+// Aether-Lang - Invalid test program
+// Designed to trigger Panic Mode error recovery.
+
+let a: int = ;
+let b float = 3.14;
+let c: tensor<f32, [10, ]>;
+let d: int = "not an int;
+
+@ # $
+
+if (x == 0) {
+  let bad: int =
+}

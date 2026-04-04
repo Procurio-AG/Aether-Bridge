@@ -1,0 +1,23 @@
+// Aether-Lang - Semantically valid test program
+// All types check, all tensors have matching shapes.
+
+let x: int = 42;
+let pi: float = 3.14;
+let weights: tensor<f32, [784, 256]>;
+
+x = x + 1;
+pi = pi * 2.0;
+
+result := infer(weights, "gpt-4-vision");
+
+remote("192.168.1.100") {
+  let batch: tensor<f32, [784, 256]>;
+  batch = batch + weights;
+}
+
+if (x == 0) {
+  let y: int = 10;
+  y = y - 1;
+} else {
+  x = x / 2;
+}
