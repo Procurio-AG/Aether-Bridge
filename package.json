@@ -5,9 +5,15 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/frontend-ts/main.ts",
-    "test:valid": "ts-node src/frontend-ts/main.ts samples/test_valid.aeth",
-    "test:invalid": "ts-node src/frontend-ts/main.ts samples/test_invalid.aeth",
-    "test:lexer": "ts-node src/frontend-ts/test_lexer.ts"
+    "compile:valid": "ts-node src/frontend-ts/main.ts samples/test_valid.aeth",
+    "compile:invalid": "ts-node src/frontend-ts/main.ts samples/test_invalid.aeth",
+    "test": "npm run test:lexer && npm run test:parser && npm run test:analyzer",
+    "test:lexer": "ts-node src/frontend-ts/test_lexer.ts",
+    "test:parser": "ts-node src/frontend-ts/test_parser.ts",
+    "test:analyzer": "ts-node src/frontend-ts/test_analyzer.ts",
+    "test:e2e": "ts-node src/frontend-ts/test_e2e.ts",
+    "test:compiled": "npm run build && node dist/frontend-ts/test_lexer.js && node dist/frontend-ts/test_parser.js && node dist/frontend-ts/test_analyzer.js",
+    "bridge:json": "ts-node src/frontend-ts/test_e2e.ts --bridge-only"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

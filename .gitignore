@@ -31,3 +31,27 @@ walkthrough.md
 
 # TypeScript
 tsconfig.tsbuildinfo
+
+### AI and Agent Tools ###
+# code-review-graph files (local knowledge graph)
+.code-review-graph/
+graph.db
+
+# Claude Code / Antigravity / Aider / Cursor
+.aider*
+.claude/
+.cursor/
+.antigravity/
+
+# Agent execution logs and temporary workspaces
+*.agent.log
+.agent-scratchpad/
+mcp-config.json
+.claude/
+.cursorrules
+.mcp.json
+.opencode.json
+.windsurfrules
+AGENTS.md
+CLAUDE.md
+GEMINI.md
