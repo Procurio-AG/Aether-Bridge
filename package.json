@@ -1,0 +1,17 @@
+{
+  "name": "aether-lang",
+  "version": "0.1.0",
+  "description": "A system-level DSL for AI tensor orchestration and remote cloud calls",
+  "scripts": {
+    "build": "tsc",
+    "compile": "ts-node src/frontend-ts/main.ts",
+    "test:valid": "ts-node src/frontend-ts/main.ts samples/test_valid.aeth",
+    "test:invalid": "ts-node src/frontend-ts/main.ts samples/test_invalid.aeth",
+    "test:lexer": "ts-node src/frontend-ts/test_lexer.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.0"
+  }
+}

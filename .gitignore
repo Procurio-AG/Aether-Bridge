@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build Outputs
+dist/
+build/
+output/
+*.o
+*.wasm
+*.js
+!jest.config.js
+!wasm.js
+
+# IDE and System Files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.log
+
+# AI/Agent Metadata
+.gemini/
+.agents/
+.agent/
+_agents/
+_agent/
+implementation_plan.md
+task.md
+walkthrough.md
+
+# TypeScript
+tsconfig.tsbuildinfo
