@@ -1,0 +1,64 @@
+import { memo, useRef, useEffect } from 'react';
+import Editor from '@monaco-editor/react';
+
+interface SourceEditorProps {
+    defaultValue: string;
+    onChange: (value: string) => void;
+}
+
+/**
+ * Isolated Source Editor component to prevent re-renders in the parent 'App' 
+ * from causing layout/measurement glitches in Monaco.
+ */
+export const SourceEditor = memo(({ defaultValue, onChange }: SourceEditorProps) => {
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Debounce the change event to ensure smooth typing while allowing the compiler to stay up to date.
+    const handleEditorChange = (value: string | undefined) => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        
+        timerRef.current = setTimeout(() => {
+            onChange(value || "");
+        }, 300); // 300ms delay to keep the local Monaco instance fluid
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
+
+    return (
+        <Editor
+            height="100%"
+            defaultLanguage="javascript" // Aether-lang closer to JS syntax for highlighting
+            theme="vs-dark"
+            defaultValue={defaultValue}
+            onChange={handleEditorChange}
+            options={{
+                minimap: { enabled: false },
+                fontSize: 13,
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                fontLigatures: true,
+                lineHeight: 22,
+                padding: { top: 16 },
+                scrollBeyondLastLine: false,
+                cursorSmoothCaretAnimation: "on",
+                cursorBlinking: "smooth",
+                renderLineHighlight: "all",
+                selectionHighlight: true,
+                // Critical: Force Monaco to monitor its own container size for resizing consistency.
+                automaticLayout: true, 
+                scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8,
+                },
+                guides: {
+                    indentation: true,
+                },
+                wordWrap: "on",
+            }}
+        />
+    );
+});
