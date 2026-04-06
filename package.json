@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/frontend-ts/main.ts",
-    "compile:valid": "ts-node src/frontend-ts/main.ts samples/test_valid.aeth",
+    "compile:valid": "ts-node src/frontend-ts/main.ts samples/test_semantic_valid.aeth",
     "compile:invalid": "ts-node src/frontend-ts/main.ts samples/test_invalid.aeth",
     "test": "npm run test:lexer && npm run test:parser && npm run test:analyzer",
     "test:lexer": "ts-node src/frontend-ts/test_lexer.ts",
@@ -13,7 +13,10 @@
     "test:analyzer": "ts-node src/frontend-ts/test_analyzer.ts",
     "test:e2e": "ts-node src/frontend-ts/test_e2e.ts",
     "test:compiled": "npm run build && node dist/frontend-ts/test_lexer.js && node dist/frontend-ts/test_parser.js && node dist/frontend-ts/test_analyzer.js",
-    "bridge:json": "ts-node src/frontend-ts/test_e2e.ts --bridge-only"
+    "bridge:json": "ts-node src/frontend-ts/test_e2e.ts --bridge-only",
+    "backend:build": "cd src/backend-cpp && make",
+    "backend:run": "cd src/backend-cpp && make run",
+    "pipeline": "npm run compile:valid && npm run backend:run"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

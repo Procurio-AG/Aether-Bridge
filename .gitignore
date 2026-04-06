@@ -12,6 +12,10 @@ output/
 !jest.config.js
 !wasm.js
 
+# C++ Backend
+src/backend-cpp/aether_backend
+src/backend-cpp/include/nlohmann/
+
 # IDE and System Files
 .vscode/
 .idea/
