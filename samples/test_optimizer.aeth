@@ -1,0 +1,9 @@
+// Aether-Lang - Optimizer test program
+// Contains patterns designed to trigger all 3 optimization passes.
+
+let a: int = 3 + 7;
+let b: float = 2.0 * 5.0;
+let c: int = 10 - 4;
+let x: int = 42;
+
+x = x + 1;
