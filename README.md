@@ -23,7 +23,8 @@ Responsible for rapid lexical analysis, syntax parsing, and rigorous semantic va
 **The Conditional Execution Gate**: Control only passes to the backend if the `DiagnosticBag` contains zero errors, enforcing a rigorous "Safety-First" model suited for mission-critical systems.
 
 ### Phase B: C++ Backend / WASM (Stages 4-6)
-Compiled to WebAssembly (WASM) for industry-standard optimization and assembly generation.
+The backend is written in high-performance C++ and compiled to WebAssembly (WASM) using Emscripten. This architecture enables a pure client-side, serverless compilation experience in the browser while maintaining native-level performance for optimization and code generation.
+
 - **Stage 4 (IR Generation)**: Lowers the JSON-serialized AST into Three-Address Code (TAC) without rebuilding symbol tables.
 - **Stage 5 (Optimization)**: Performs dead-code elimination and constant folding on tensor operations.
 - **Stage 6 (Code Generation)**: Maps optimized IR to x86-64 assembly using Control Flow Graphs (CFGs) for efficient branching.
@@ -38,13 +39,13 @@ aether-lang/
 |-- samples/                    # Example .aeth programs
 |   |-- test_valid.aeth         # Correct AI orchestration code
 |   \-- test_invalid.aeth       # Edge cases for error recovery testing
-|-- output/                     # Compiler outputs
-|   |-- listing.txt             # Interleaved source/error diagnostics
-|   \-- target.s                # Generated x86-64 assembly
+|-- visualizer/                 # React-based AST and Assembly inspection tool
+|   \-- public/                 # WASM artifacts and static assets
 |-- src/
 |   |-- frontend-ts/            # Stage 1-3 (TypeScript)
 |   |-- backend-cpp/            # Stage 4-6 (C++ / WASM)
-|   \-- visualizer-ui/          # React-based AST inspection tool
+|   |   |-- include/            # Core compiler engines
+|   |   \-- src/                # Implementation and WASM wrapper
 |-- package.json                # Project dependencies
 \-- tsconfig.json               # TypeScript configuration
 ```
@@ -77,21 +78,31 @@ string_literal  = { letter | digit | "_" | "-" | "." | "/" } ;
 
 ---
 
-## 5. Getting Started
+## 5. Build and Execution
 
 ### Prerequisites
 - Node.js (v20+)
 - npm
 - TypeScript & ts-node
+- Emscripten SDK (emsdk) - Required for compiling the C++ backend to WASM
 
 ### Installation
 ```bash
 npm install
 ```
 
-### Running the Lexer Test Suite
+### Compiling the WASM Backend
+To update the WebAssembly artifacts used by the visualizer:
 ```bash
-npm run test:lexer
+cd src/backend-cpp
+make wasm
+```
+
+### Running the Development Environment
+To launch the React-based visualizer with the new WASM backend:
+```bash
+cd visualizer
+npm run dev
 ```
 
 ---
