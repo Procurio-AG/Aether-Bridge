@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { SourceEditor } from './components/SourceEditor';
-
-import { compile, IRGenerator, Optimizer, X86Emitter, formatTAC } from './pipeline';
+import { compile } from './pipeline';
+import { loadAetherWasm } from './pipeline/wasmLoader';
 import { ASTViewer } from './components/ASTViewer';
 
 const DEFAULT_CODE = `// ==========================================
@@ -83,69 +83,97 @@ function App() {
     };
   }, [isResizing, onResize, stopResizing]);
 
+  const [wasmInstance, setWasmInstance] = useState<any>(null);
+  const [isWasmLoading, setIsWasmLoading] = useState(true);
+
+  useEffect(() => {
+    loadAetherWasm()
+      .then((instance: any) => {
+        setWasmInstance(instance);
+        setIsWasmLoading(false);
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] SUCCESS: Aether-Lang WASM Backend initialized.`]);
+      })
+      .catch((err: any) => {
+        setIsWasmLoading(false);
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: Failed to load WASM backend: ${err.message}`]);
+      });
+  }, []);
+
   const activeStage = STAGES[activeStageIdx];
 
-  const handleCompile = useCallback(() => {
+  const handleCompile = useCallback(async () => {
+    if (!wasmInstance) {
+      setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: WASM backend is not ready.`]);
+      return;
+    }
+
     setIsCompiling(true);
-    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] INFO: Compilation pipeline triggered.`]);
+    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] INFO: Starting compilation pipeline...`]);
     
-    setTimeout(() => {
-      try {
-        // Stage 1-3: Lexing, Parsing, Semantic (Frontend)
-        const res = compile(code);
+    try {
+      // Stage 1-3: Lexing, Parsing, Semantic (Frontend)
+      const res = compile(code);
+      const nextResult: any = { ...res };
+      
+      if (res.gateOpen) {
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] INFO: Frontend stages succeeded. Invoking WASM backend...`]);
         
-        // Finalize state
-        const nextResult: any = { ...res };
-        
-        if (res.gateOpen) {
-          setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] INFO: Frontend stages succeeded. Generating backend IR...`]);
-          
-          // Stage 4: IR Generation
-          const irGen = new IRGenerator();
-          const rawInstrs = irGen.generate(res.ast, res.totalFrameSize);
-          nextResult.rawTac = formatTAC(rawInstrs, "Raw Three-Address Code");
-          setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] INFO: IR (TAC) generated.`]);
+        // Prepare payload for WASM
+        const payload = JSON.stringify({
+          _gate: { proceed: true },
+          _stats: { totalFrameSize: res.totalFrameSize },
+          ast: res.ast
+        });
 
-          // Stage 5: Optimization
-          const optimizer = new Optimizer();
-          const optInstrs = optimizer.optimize(rawInstrs);
-          nextResult.optTac = formatTAC(optInstrs, "Optimized Three-Address Code");
-          nextResult.optStats = optimizer.stats;
-          setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] DEBUG: Optimizations completed (CF:${optimizer.stats.constantsFolded}, DCE:${optimizer.stats.deadCodeRemoved}).`]);
+        console.log("[WASM_DEBUG] OUTGOING Payload:", payload);
 
-          // Stage 6: X86 Code Emission
-          const emitter = new X86Emitter();
-          nextResult.asm = emitter.emit(optInstrs);
-          setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] SUCCESS: Native assembly generated.`]);
+        // Invoke C++ Backend via WASM
+        const responseJson = wasmInstance.compile_to_asm(payload);
+        console.log("[WASM_DEBUG] RAW Response String:", responseJson);
 
-          setLastResult(nextResult);
-          setActiveStageIdx(5); // Default to assembly on success
-        } else {
-          // FAIL FAST: Determine which stage failed
-          const hasLexErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"));
-          const hasParseErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("expected") || d.message.toLowerCase().includes("invalid syntax"));
-          
-          let failIdx = 2; // Default to Semantic
-          if (hasLexErrors) failIdx = 0;
-          else if (hasParseErrors) failIdx = 1;
+        const response = JSON.parse(responseJson);
+        console.log("[WASM_DEBUG] PARSED Response Object:", response);
 
-          setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: Compilation halted at stage ${STAGES[failIdx]}. Backend generation skipped.`]);
-          
-          setLastResult(nextResult);
-          setActiveStageIdx(failIdx); // Auto-jump to the error
+        if (response.error) {
+          throw new Error(`C++ Backend Error: ${response.error}`);
         }
 
-      } catch (err: any) {
-        setLastResult({
-          error: err.message,
-          bag: { hasErrors: true, diagnostics: [{ line: 0, message: `CRITICAL: ${err.message}` }] }
-        });
-        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: ${err.message}`]);
-      } finally {
-        setIsCompiling(false);
+        // Map results from WASM back to UI
+        nextResult.rawTac = response.rawTac;
+        nextResult.optTac = response.optTac;
+        nextResult.asm = response.asm;
+        
+        if (response.optStats) {
+            nextResult.optStats = response.optStats;
+            setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] DEBUG: C++ Optimizer: CF:${response.optStats.constantsFolded}, DCE:${response.optStats.deadCodeRemoved}`]);
+        }
+
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] SUCCESS: Full AST-to-Assembly pipeline completed in Wasm.`]);
+        setLastResult(nextResult);
+        setActiveStageIdx(5); // Auto-jump to Assembly
+      } else {
+        // Handle Frontend failure
+        const hasLexErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"));
+        const hasParseErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("expected") || d.message.toLowerCase().includes("syntax"));
+        
+        let failIdx = 2; // Default to Semantic
+        if (hasLexErrors) failIdx = 0;
+        else if (hasParseErrors) failIdx = 1;
+
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: Compilation halted at stage ${STAGES[failIdx]}.`]);
+        setLastResult(nextResult);
+        setActiveStageIdx(failIdx);
       }
-    }, 200);
-  }, [code]);
+    } catch (err: any) {
+      setLastResult({
+        error: err.message,
+        bag: { hasErrors: true, diagnostics: [{ line: 0, message: `CRITICAL: ${err.message}` }] }
+      });
+      setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ERROR: ${err.message}`]);
+    } finally {
+      setIsCompiling(false);
+    }
+  }, [code, wasmInstance]);
 
   const renderActiveStageData = () => {
     if (!lastResult) {
@@ -262,13 +290,13 @@ function App() {
                     <div className="flex items-center gap-4">
                         <button 
                             onClick={handleCompile}
-                            disabled={isCompiling}
+                            disabled={isCompiling || isWasmLoading}
                             className="bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] text-on-primary-container font-bold px-6 py-1.5 rounded-full text-xs shadow-[0_0_30px_rgba(233,213,255,0.15)] hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer active:scale-95"
                         >
-                            {isCompiling ? (
+                            {isCompiling || isWasmLoading ? (
                                 <><div className="w-3.5 h-3.5 rounded-full border-2 border-on-primary-container border-t-transparent animate-spin"></div></>
                             ) : <span className="material-symbols-outlined text-sm">bolt</span>}
-                            <span>COMPILE</span>
+                            <span>{isWasmLoading ? "INITIALIZING..." : "COMPILE"}</span>
                         </button>
                     </div>
                 </div>
