@@ -1,0 +1,4 @@
+// Specifically designed to trigger the aggressive optimizer
+let a: int = 10 + 20;
+let b: int = a * 2;
+let c: float = 3.14 + 1.86;

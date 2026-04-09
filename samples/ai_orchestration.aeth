@@ -1,0 +1,4 @@
+// Demonstrates tensor allocation and AI inference
+let input: tensor<f32, [1, 784]>;
+let weights: tensor<f32, [784, 10]>;
+result_handle := infer(input, "models/digit_recognizer");

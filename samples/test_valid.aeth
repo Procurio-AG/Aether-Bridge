@@ -11,7 +11,7 @@ pi = pi * 2.0;
 result := infer(weights, "gpt-4-vision");
 
 remote("192.168.1.100") {
-  let batch: tensor<i32, [32, 10]>;
+  let batch: tensor<f32, [784, 256]>;
   batch = batch + weights;
 }
 

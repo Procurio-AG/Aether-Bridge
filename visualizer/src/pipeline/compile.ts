@@ -8,7 +8,8 @@ import type { ProgramNode } from "./ast";
 // -- Result type -------------------------------------------------------------
 export interface CompilationResult {
   tokens:         Token[];
-  ast:            ProgramNode;
+  rawAst:         ProgramNode;
+  analyzedAst:    ProgramNode;
   bag:            DiagnosticBag;
   sourceLines:    string[];
   gateOpen:       boolean;
@@ -28,6 +29,9 @@ export function compile(source: string): CompilationResult {
   const parser = new Parser(tokens);
   const ast    = parser.parseProgram();
 
+  // -- Snapshot pure AST state before Semantic Analysis --
+  const rawAst = JSON.parse(JSON.stringify(ast));
+
   // -- Unified Diagnostic Bag --------------------------------------
   const bag = new DiagnosticBag(sourceLines);
   bag.importLexerDiagnostics(lexer.diagnostics);
@@ -43,7 +47,8 @@ export function compile(source: string): CompilationResult {
 
   return {
     tokens,
-    ast,
+    rawAst,
+    analyzedAst: ast,
     bag,
     sourceLines,
     gateOpen,

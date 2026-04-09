@@ -4,34 +4,22 @@ import { compile } from './pipeline';
 import { loadAetherWasm } from './pipeline/wasmLoader';
 import { ASTViewer } from './components/ASTViewer';
 
-const DEFAULT_CODE = `// ==========================================
-// Aether-Lang: Multi-Stage Compilation Demo
-// ==========================================
+const DEFAULT_CODE = `// Aether-Lang: Integrated Pipeline Demo
+let x: int = 10 + 20;
+let y: int = x + 5;
+let threshold: float = 0.5;
 
-let x: int = 10;
-let y: int = 20;
+// AI Orchestration Stage
+let input: tensor<f32, [1, 784]>;
+prediction := infer(input, "mnist_model_v2");
 
-// Semantic Phase: Expressions & Arithmetic
-let z: int = (x + y) * 2;
-
-// Declare a tensor for the AI model to consume
-let input_data: tensor<f32, [1, 10]>; 
-
-// Control Flow Phase: Branching
-if (z > 50) {
-    let result: int = 1;
-    z = z - 5;
-} else {
-    let result: int = 0;
+// Remote Execution Stage
+remote("10.0.0.101") {
+    let cloud_status: int = 200;
+    if (x > 15) {
+        x = x - 10;
+    }
 }
-
-// Remote Execution Phase
-remote ("192.168.1.105") {
-    let cloud_val: int = z * 10;
-}
-
-// AI Interface Phase
-ai_response := infer(input_data, "distil-gpt2");
 `;
 
 type Stage = 'Lexing' | 'Parsing' | 'Semantic' | 'IR' | 'Optimized' | 'Assembly';
@@ -122,7 +110,7 @@ function App() {
         const payload = JSON.stringify({
           _gate: { proceed: true },
           _stats: { totalFrameSize: res.totalFrameSize },
-          ast: res.ast
+          ast: res.analyzedAst
         });
 
         console.log("[WASM_DEBUG] OUTGOING Payload:", payload);
@@ -139,6 +127,8 @@ function App() {
         }
 
         // Map results from WASM back to UI
+        nextResult.rawAst = res.rawAst;
+        nextResult.analyzedAst = res.analyzedAst;
         nextResult.rawTac = response.rawTac;
         nextResult.optTac = response.optTac;
         nextResult.asm = response.asm;
@@ -231,7 +221,7 @@ function App() {
           <div className="absolute inset-0 flex flex-col text-primary-fixed">
              {errorBanner}
              <div className="flex-1 relative overflow-auto">
-                <ASTViewer ast={lastResult.ast} expandToggleSeq={astExpandToggle} isExpanded={astIsExpanded} />
+                <ASTViewer ast={lastResult.rawAst} expandToggleSeq={astExpandToggle} isExpanded={astIsExpanded} />
              </div>
           </div>
         );
@@ -240,7 +230,7 @@ function App() {
           <div className="absolute inset-0 flex flex-col text-secondary">
              {errorBanner}
              <div className="flex-1 relative overflow-auto">
-                <ASTViewer ast={lastResult.ast} expandToggleSeq={astExpandToggle} isExpanded={astIsExpanded} />
+                <ASTViewer ast={lastResult.analyzedAst} expandToggleSeq={astExpandToggle} isExpanded={astIsExpanded} />
              </div>
           </div>
         );
