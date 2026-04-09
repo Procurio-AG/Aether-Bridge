@@ -4,12 +4,13 @@ interface ASTNodeProps {
     data: any;
     name: string;
     isLast: boolean;
+    depth: number;
     defaultExpanded?: boolean;
 }
 
 const isObject = (val: any) => val !== null && typeof val === 'object';
 
-const ASTNode = ({ data, name, isLast, defaultExpanded = true }: ASTNodeProps) => {
+const ASTNode = ({ data, name, isLast, depth, defaultExpanded = true }: ASTNodeProps) => {
     const [expanded, setExpanded] = useState(defaultExpanded);
 
     useEffect(() => {
@@ -22,71 +23,83 @@ const ASTNode = ({ data, name, isLast, defaultExpanded = true }: ASTNodeProps) =
     };
 
     if (!isObject(data)) {
-        // Primitive value
-        let valColor = 'text-[#93c5fd]'; // numbers (Sky Blue)
+        // Primitive value styling
+        let valColor = 'text-[#93c5fd]'; // default: numbers (Sky Blue)
         if (typeof data === 'string') valColor = 'text-[#c3ecd7]'; // strings (Mint Green)
         else if (typeof data === 'boolean') valColor = 'text-[#fca5a5]'; // booleans (Coral)
 
         return (
-            <div className="flex font-mono text-sm leading-6">
-                <span className="text-[#e9d5ff] font-bold mr-2">{name}:</span>
-                <span className={valColor}>{JSON.stringify(data)}</span>
-                {!isLast && <span className="text-outline-variant">,</span>}
+            <div className="flex font-mono text-xs leading-5 hover:bg-white/5 pr-2 rounded group relative">
+                {/* Vertical line connector */}
+                {depth > 0 && <div className="absolute left-[-14px] top-0 bottom-0 w-[1px] bg-outline-variant/20"></div>}
+                {/* Horizontal line connector */}
+                {depth > 0 && <div className="absolute left-[-14px] top-[10px] w-2.5 h-[1px] bg-outline-variant/20"></div>}
+
+                <span className="text-[#e9d5ff]/60 font-bold mr-2 select-none">{name}:</span>
+                <span className={`${valColor} break-all`}>{JSON.stringify(data)}</span>
+                {!isLast && <span className="text-outline-variant opacity-40">,</span>}
             </div>
         );
     }
 
     const isArray = Array.isArray(data);
-    const keys = Object.keys(data);
+    const keys = Object.keys(data).filter(k => k !== 'loc'); // Filter out location data for cleaner tree
     const isEmpty = keys.length === 0;
-
-    if (isEmpty) {
-        return (
-            <div className="flex font-mono text-sm leading-6">
-                <span className="text-[#e9d5ff] font-bold mr-2">{name}:</span>
-                <span className="text-outline-variant">{isArray ? '[]' : '{}'}</span>
-                {!isLast && <span className="text-outline-variant">,</span>}
-            </div>
-        );
-    }
 
     const bracketOpen = isArray ? '[' : '{';
     const bracketClose = isArray ? ']' : '}';
     
-    // special logic to highlight 'type' field in objects quickly
-    const typeLabel = !isArray && data.type ? ` <${data.type}>` : '';
+    // Premium Node Highlighting
+    const nodeType = !isArray && data.type ? data.type : '';
+    let nodeColor = 'text-primary-dim';
+    if (nodeType.includes('Decl')) nodeColor = 'text-secondary-fixed';
+    else if (nodeType.includes('Expr')) nodeColor = 'text-tertiary-fixed';
+    else if (nodeType === 'Program') nodeColor = 'text-primary font-black';
 
     return (
-        <div className="font-mono text-sm leading-6">
+        <div className="font-mono text-xs leading-5 relative">
+            {/* Vertical branching lines */}
+            {depth > 0 && <div className="absolute left-[-14px] top-0 bottom-0 w-[1px] bg-outline-variant/20"></div>}
+            {/* Horizontal connection line */}
+            {depth > 0 && <div className="absolute left-[-14px] top-[10px] w-2.5 h-[1px] bg-outline-variant/20"></div>}
+
             <div 
-                className="flex items-center cursor-pointer hover:bg-surface-container-highest/30 inline-flex pr-2 rounded transition-colors"
+                className="flex items-center cursor-pointer hover:bg-white/10 inline-flex pr-3 rounded transition-all group"
                 onClick={handleToggle}
             >
-                <div className="w-4 h-4 flex items-center justify-center mr-1 text-outline-variant">
+                <div className={`w-4 h-4 flex items-center justify-center mr-1 ${expanded ? 'text-primary' : 'text-outline-variant'}`}>
                     <span className="material-symbols-outlined text-[14px]">
                         {expanded ? 'expand_more' : 'chevron_right'}
                     </span>
                 </div>
-                {name && <span className="text-[#e9d5ff] font-bold mr-2">{name}:</span>}
-                <span className="text-outline-variant">{bracketOpen}</span>
+                {name && <span className="text-[#e9d5ff]/80 font-bold mr-2 select-none">{name}:</span>}
+                <span className="text-outline-variant/60">{bracketOpen}</span>
+                
+                {nodeType && (
+                    <span className={`ml-2 px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${nodeColor} text-[9px] font-black tracking-widest uppercase`}>
+                        {nodeType}
+                    </span>
+                )}
+
                 {!expanded && (
                     <>
-                       <span className="text-outline-variant mx-2">...</span>
-                       <span className="text-outline-variant">{bracketClose}</span>
-                       <span className="text-primary-dim ml-2 text-xs italic opacity-70">{typeLabel}</span>
-                       {!isLast && <span className="text-outline-variant">,</span>}
+                       <span className="text-outline-variant mx-1">...</span>
+                       <span className="text-outline-variant/60">{bracketClose}</span>
+                       {!isLast && <span className="text-outline-variant opacity-40">,</span>}
                     </>
                 )}
             </div>
             
-            {expanded && (
-                <div className="pl-6 border-l border-outline-variant/20 ml-2">
+            {expanded && !isEmpty && (
+                <div className="pl-5 relative">
+                    {/* Recursive children */}
                     {keys.map((key, i) => (
                         <ASTNode 
                             key={key} 
-                            name={isArray ? '' : key} 
+                            name={isArray ? i.toString() : key} 
                             data={data[key as keyof typeof data]} 
                             isLast={i === keys.length - 1} 
+                            depth={depth + 1}
                             defaultExpanded={defaultExpanded}
                         />
                     ))}
@@ -95,8 +108,8 @@ const ASTNode = ({ data, name, isLast, defaultExpanded = true }: ASTNodeProps) =
             
             {expanded && (
                 <div className="flex">
-                    <span className="text-outline-variant">{bracketClose}</span>
-                    {!isLast && <span className="text-outline-variant">,</span>}
+                    <span className="text-outline-variant/60">{bracketClose}</span>
+                    {!isLast && <span className="text-outline-variant opacity-40">,</span>}
                 </div>
             )}
         </div>
@@ -105,26 +118,38 @@ const ASTNode = ({ data, name, isLast, defaultExpanded = true }: ASTNodeProps) =
 
 export interface ASTViewerProps {
     ast: any;
-    expandToggleSeq: number; // Increment to force expand/collapse
-    isExpanded: boolean;     // Defines if the toggle sequence meant expand or collapse
+    expandToggleSeq: number; 
+    isExpanded: boolean;     
 }
 
 export function ASTViewer({ ast, expandToggleSeq, isExpanded }: ASTViewerProps) {
-    // We use expandToggleSeq as a key so that when the user clicks 'Expand All' or 'Collapse All',
-    // the whole tree is forced to remount with the new default expanded state.
-    // This is a simple but effective React hack for deep tree state reset.
-    
-    if (!ast) return null;
+    if (!ast) return (
+        <div className="h-full flex items-center justify-center opacity-20 italic text-xs">
+            No AST structure available.
+        </div>
+    );
     
     return (
-        <div className="p-4 overflow-auto h-full scrollbar-hide">
+        <div className="p-8 overflow-auto h-full scrollbar-hide select-text">
             <ASTNode 
                 key={expandToggleSeq} 
                 data={ast} 
-                name="root" 
+                name="Program" 
                 isLast={true} 
+                depth={0}
                 defaultExpanded={isExpanded} 
             />
+            {/* Legend or Footer */}
+            <div className="mt-8 pt-4 border-t border-white/5 flex gap-4 opacity-40">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></div>
+                    <span className="text-[8px] uppercase font-bold tracking-widest">Declarations</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></div>
+                    <span className="text-[8px] uppercase font-bold tracking-widest">Expressions</span>
+                </div>
+            </div>
         </div>
     );
 }
