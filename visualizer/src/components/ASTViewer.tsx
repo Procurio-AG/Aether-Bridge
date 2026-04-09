@@ -39,7 +39,7 @@ const ASTNode = ({ data, name, depth, defaultExpanded = true }: ASTNodeProps) =>
     }
 
     const isArray = Array.isArray(data);
-    const keys = Object.keys(data).filter(k => k !== 'loc' && k !== 'type'); // Filter out metadata
+    const keys = Object.keys(data).filter(k => k !== 'loc' && k !== 'type'); 
     const isEmpty = keys.length === 0;
     
     const nodeType = !isArray && data.type ? data.type : '';
@@ -78,7 +78,7 @@ const ASTNode = ({ data, name, depth, defaultExpanded = true }: ASTNodeProps) =>
             
             {expanded && !isEmpty && (
                 <div className="pl-5 relative">
-                    {keys.map((key, i) => (
+                    {keys.map((key) => (
                         <ASTNode 
                             key={key} 
                             name={isArray ? "" : key} 
