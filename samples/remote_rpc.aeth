@@ -1,0 +1,5 @@
+// Demonstrates cloud block scope and remote execution
+let local_count: int = 5;
+remote("192.168.1.50") {
+    let remote_sum: int = local_count + 10;
+}

@@ -131,6 +131,11 @@ struct Instruction {
     static Instruction nop() {
         return {OpCode::NOP, "", "", "", "", 0, 0.0, 0};
     }
+
+    bool isArithmetic() const {
+        return opcode == OpCode::ADD || opcode == OpCode::SUB ||
+               opcode == OpCode::MUL || opcode == OpCode::DIV;
+    }
 };
 
 // ── Opcode → String ────────────────────────────────────────────────────────

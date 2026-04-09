@@ -85,44 +85,58 @@ private:
     // ========================================================================
 
     std::vector<Instruction> constantFolding(std::vector<Instruction> instrs) {
-        // Map: temp register → {isConst, intVal, floatVal, isFloat, instrIndex}
-        struct ConstInfo {
+        // Map: temp register OR memory offset -> {isConst, intVal, floatVal, isFloat}
+        struct ConstValue {
             bool   isConst  = false;
             int    intVal   = 0;
             double floatVal = 0.0;
             bool   isFloat  = false;
-            int    index    = -1;
         };
 
-        std::unordered_map<std::string, ConstInfo> constMap;
+        std::unordered_map<std::string, ConstValue> regMap;
+        std::unordered_map<int, ConstValue> memMap; // Tracks stack offsets relative to RBP
 
         for (int i = 0; i < (int)instrs.size(); i++) {
             auto& instr = instrs[i];
 
+            // 1. Handle LOAD_CONST
             if (instr.opcode == OpCode::LOAD_CONST) {
-                ConstInfo ci;
-                ci.isConst = true;
-                ci.index   = i;
+                ConstValue cv;
+                cv.isConst = true;
                 if (instr.extra == "float") {
-                    ci.isFloat  = true;
-                    ci.floatVal = instr.floatVal;
+                    cv.isFloat  = true;
+                    cv.floatVal = instr.floatVal;
                 } else {
-                    ci.isFloat = false;
-                    ci.intVal  = instr.intVal;
+                    cv.isFloat = false;
+                    cv.intVal  = instr.intVal;
                 }
-                constMap[instr.dest] = ci;
+                regMap[instr.dest] = cv;
                 continue;
             }
 
-            // Check arithmetic ops
-            if (instr.opcode == OpCode::ADD || instr.opcode == OpCode::SUB ||
-                instr.opcode == OpCode::MUL || instr.opcode == OpCode::DIV) {
+            // 2. Handle LOAD_MEM (Constant Propagation from Memory)
+            if (instr.opcode == OpCode::LOAD_MEM) {
+                auto it = memMap.find(instr.intVal);
+                if (it != memMap.end() && it->second.isConst) {
+                    const auto& cv = it->second;
+                    if (cv.isFloat) {
+                        instr = Instruction::loadConstFloat(instr.dest, cv.floatVal, instr.srcLine);
+                    } else {
+                        instr = Instruction::loadConst(instr.dest, cv.intVal, instr.srcLine);
+                    }
+                    regMap[instr.dest] = cv;
+                    stats_.constantsFolded++;
+                    continue;
+                }
+            }
 
-                auto itL = constMap.find(instr.src1);
-                auto itR = constMap.find(instr.src2);
+            // 3. Handle Arithmetic Fold
+            if (instr.isArithmetic()) {
+                auto itL = regMap.find(instr.src1);
+                auto itR = regMap.find(instr.src2);
 
-                if (itL != constMap.end() && itL->second.isConst &&
-                    itR != constMap.end() && itR->second.isConst) {
+                if (itL != regMap.end() && itL->second.isConst &&
+                    itR != regMap.end() && itR->second.isConst) {
 
                     const auto& lhs = itL->second;
                     const auto& rhs = itR->second;
@@ -137,39 +151,45 @@ private:
                         case OpCode::SUB: result = lv - rv; break;
                         case OpCode::MUL: result = lv * rv; break;
                         case OpCode::DIV:
-                            if (rv == 0.0) continue; // skip division by zero
+                            if (rv == 0.0) continue; 
                             result = lv / rv;
                             break;
                         default: continue;
                     }
 
-                    // Replace the arithmetic instruction with LOAD_CONST
+                    // Replace with LOAD_CONST
                     if (isFloat) {
-                        instrs[i] = Instruction::loadConstFloat(instr.dest, result, instr.srcLine);
+                        instr = Instruction::loadConstFloat(instr.dest, result, instr.srcLine);
                     } else {
-                        instrs[i] = Instruction::loadConst(instr.dest, (int)result, instr.srcLine);
+                        instr = Instruction::loadConst(instr.dest, (int)result, instr.srcLine);
                     }
 
-                    // NOP the original LOAD_CONST instructions (if not used elsewhere)
-                    instrs[lhs.index] = Instruction::nop();
-                    instrs[rhs.index] = Instruction::nop();
-
-                    // Register the folded result as a new constant
-                    ConstInfo ci;
-                    ci.isConst  = true;
-                    ci.isFloat  = isFloat;
-                    ci.intVal   = (int)result;
-                    ci.floatVal = result;
-                    ci.index    = i;
-                    constMap[instr.dest] = ci;
+                    // Update map
+                    ConstValue cv;
+                    cv.isConst  = true;
+                    cv.isFloat  = isFloat;
+                    cv.intVal   = (int)result;
+                    cv.floatVal = result;
+                    regMap[instr.dest] = cv;
 
                     stats_.constantsFolded++;
+                    continue;
                 }
             }
 
-            // If a temp is overwritten by a non-const, invalidate it
-            if (!instr.dest.empty() && instr.opcode != OpCode::LOAD_CONST) {
-                constMap.erase(instr.dest);
+            // 4. Handle STORE_MEM (Constant Propagation to Memory)
+            if (instr.opcode == OpCode::STORE_MEM) {
+                auto it = regMap.find(instr.src1);
+                if (it != regMap.end() && it->second.isConst) {
+                    memMap[instr.intVal] = it->second;
+                } else {
+                    memMap.erase(instr.intVal); // Overwritten with unknown
+                }
+            }
+
+            // 5. Cleanup for Side-effects
+            if (!instr.dest.empty() && instr.opcode != OpCode::LOAD_CONST && !instr.isArithmetic()) {
+                regMap.erase(instr.dest);
             }
         }
 
