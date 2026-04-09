@@ -281,7 +281,7 @@ function App() {
                         <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] font-headline tracking-tighter">Aether</h1>
                         
                         {/* Integrated Stage Selection */}
-                        <div className="hidden xl:flex items-center gap-1 py-1 px-1 rounded-full bg-surface-container-highest/20 border border-white/5 ml-4">
+                        <div className="flex items-center gap-1 py-1 px-1 rounded-full bg-surface-container-highest/20 border border-white/5 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none">
                             {STAGES.map((stage, idx) => {
                                 const isActive = activeStageIdx === idx;
                                 const hasCompiledData = lastResult !== null;
@@ -292,12 +292,12 @@ function App() {
                                         key={stage}
                                         onClick={() => setActiveStageIdx(idx)}
                                         disabled={disabled}
-                                        className={`flex items-center gap-2 px-3 py-1.5 transition-all duration-150 rounded-full border border-transparent
+                                        className={`flex items-center gap-2 px-3 py-1.5 transition-all duration-150 rounded-full border border-transparent shrink-0
                                           ${isActive 
                                             ? 'bg-[#e9d5ff]/10 text-[#e9d5ff] border-[#e9d5ff]/30 shadow-[0_0_15px_rgba(233,213,255,0.05)]' 
                                             : 'text-on-surface-variant/60 hover:text-[#e9d5ff]'
                                           }
-                                          ${disabled ? 'opacity-30 cursor-not-allowed hidden 2xl:flex' : 'cursor-pointer'}
+                                          ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
                                         `}
                                     >
                                         <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
