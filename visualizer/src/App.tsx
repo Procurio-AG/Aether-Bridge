@@ -22,16 +22,15 @@ remote("10.0.0.101") {
 }
 `;
 
-type Stage = 'Lexing' | 'Parsing' | 'Semantic' | 'IR' | 'Optimized' | 'Assembly';
-const STAGES: Stage[] = ['Lexing', 'Parsing', 'Semantic', 'IR', 'Optimized', 'Assembly'];
+type Stage = 'Lexical Analyzer' | 'Syntax Analyzer' | 'Semantic Analyzer' | 'Intermediate Code Generator' | 'Assembly Code';
+const STAGES: Stage[] = ['Lexical Analyzer', 'Syntax Analyzer', 'Semantic Analyzer', 'Intermediate Code Generator', 'Assembly Code'];
 
 const STAGE_ICONS: Record<Stage, string> = {
-  Lexing: 'code',
-  Parsing: 'account_tree',
-  Semantic: 'schema',
-  IR: 'terminal',
-  Optimized: 'auto_awesome',
-  Assembly: 'memory'
+  'Lexical Analyzer': 'code',
+  'Syntax Analyzer': 'account_tree',
+  'Semantic Analyzer': 'schema',
+  'Intermediate Code Generator': 'terminal',
+  'Assembly Code': 'memory'
 };
 
 function App() {
@@ -42,6 +41,7 @@ function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [astExpandToggle, setAstExpandToggle] = useState<number>(0);
   const [astIsExpanded, setAstIsExpanded] = useState<boolean>(true);
+  const [showOptimized, setShowOptimized] = useState<boolean>(true);
   
   // Resizing state
   const [logsHeight, setLogsHeight] = useState(140);
@@ -140,7 +140,7 @@ function App() {
 
         setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] SUCCESS: Full AST-to-Assembly pipeline completed in Wasm.`]);
         setLastResult(nextResult);
-        setActiveStageIdx(5); // Auto-jump to Assembly
+        setActiveStageIdx(4); // Auto-jump to Assembly Code
       } else {
         // Handle Frontend failure
         const hasLexErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"));
@@ -175,9 +175,9 @@ function App() {
     }
 
     const stageHasError = lastResult.bag?.hasErrors && (
-        (activeStage === 'Lexing' && lastResult.bag.diagnostics.some((d:any) => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"))) ||
-        (activeStage === 'Parsing' && lastResult.bag.diagnostics.some((d:any) => d.message.toLowerCase().includes("expected") || d.message.toLowerCase().includes("syntax"))) ||
-        (activeStage === 'Semantic' && !lastResult.gateOpen)
+        (activeStage === 'Lexical Analyzer' && lastResult.bag.diagnostics.some((d:any) => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"))) ||
+        (activeStage === 'Syntax Analyzer' && lastResult.bag.diagnostics.some((d:any) => d.message.toLowerCase().includes("expected") || d.message.toLowerCase().includes("syntax"))) ||
+        (activeStage === 'Semantic Analyzer' && !lastResult.gateOpen)
     );
 
     const errorBanner = stageHasError ? (
@@ -201,7 +201,7 @@ function App() {
     }
 
     switch (activeStage) {
-      case 'Lexing':
+      case 'Lexical Analyzer':
         return (
           <div className="absolute inset-0 flex flex-col font-mono text-sm overflow-hidden text-primary-dim">
              {errorBanner}
@@ -216,7 +216,7 @@ function App() {
              </div>
           </div>
         );
-      case 'Parsing':
+      case 'Syntax Analyzer':
         return (
           <div className="absolute inset-0 flex flex-col text-primary-fixed">
              {errorBanner}
@@ -225,7 +225,7 @@ function App() {
              </div>
           </div>
         );
-      case 'Semantic':
+      case 'Semantic Analyzer':
         return (
           <div className="absolute inset-0 flex flex-col text-secondary">
              {errorBanner}
@@ -234,19 +234,33 @@ function App() {
              </div>
           </div>
         );
-      case 'IR':
+      case 'Intermediate Code Generator':
         return (
-          <div className="absolute inset-0 p-6 font-mono text-sm overflow-auto text-tertiary scrollbar-hide">
-             <pre>{lastResult.rawTac}</pre>
+          <div className="absolute inset-0 flex flex-col">
+             <div className="flex items-center gap-4 px-6 py-2 bg-surface-container-highest/20 border-b border-outline-variant/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">View Mode:</span>
+                <div className="flex bg-[#0c0d18] rounded-full p-0.5 border border-white/5">
+                    <button 
+                        onClick={() => setShowOptimized(false)}
+                        className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${!showOptimized ? 'bg-primary text-on-primary' : 'text-on-surface-variant/60 hover:text-on-surface'}`}
+                    >RAW TAC</button>
+                    <button 
+                        onClick={() => setShowOptimized(true)}
+                        className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${showOptimized ? 'bg-secondary text-on-secondary' : 'text-on-surface-variant/60 hover:text-on-surface'}`}
+                    >OPTIMIZED</button>
+                </div>
+                {showOptimized && lastResult.optStats && (
+                    <span className="text-[9px] text-secondary font-mono ml-auto">
+                        Folds: {lastResult.optStats.constantsFolded} | DCE: {lastResult.optStats.deadCodeRemoved}
+                    </span>
+                )}
+             </div>
+             <div className="flex-1 p-6 font-mono text-sm overflow-auto text-tertiary scrollbar-hide">
+                <pre>{showOptimized ? lastResult.optTac : lastResult.rawTac}</pre>
+             </div>
           </div>
         );
-      case 'Optimized':
-        return (
-          <div className="absolute inset-0 p-6 font-mono text-sm overflow-auto text-secondary-fixed scrollbar-hide">
-             <pre>{lastResult.optTac}</pre>
-          </div>
-        );
-      case 'Assembly':
+      case 'Assembly Code':
         return (
           <div className="absolute inset-0 p-6 font-mono text-sm overflow-auto text-on-surface scrollbar-hide">
              <pre>{lastResult.asm}</pre>
@@ -264,20 +278,48 @@ function App() {
             <header className="bg-[#0c0d18] flex flex-col w-full shrink-0 border-b border-outline-variant/10 shadow-2xl z-20">
                 <div className="flex justify-between items-center px-8 py-3">
                     <div className="flex items-center gap-6">
-                        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] font-headline tracking-tighter">Aether-Lang</h1>
-                        <div className="hidden lg:flex items-center gap-4 py-1 px-3 rounded-full bg-surface-container-highest/20 border border-white/5">
-                            <div className="flex items-center gap-2 pr-4 border-r border-white/10">
-                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Arch</span>
-                                <span className="text-[11px] font-mono text-secondary-fixed">x86-64</span>
-                            </div>
-                            <div className="flex items-center gap-2 pl-2">
-                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Stack</span>
-                                <span className="text-[11px] font-mono text-primary-fixed">{lastResult?.totalFrameSize ?? 0} B</span>
-                            </div>
+                        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] font-headline tracking-tighter">Aether</h1>
+                        
+                        {/* Integrated Stage Selection */}
+                        <div className="hidden xl:flex items-center gap-1 py-1 px-1 rounded-full bg-surface-container-highest/20 border border-white/5 ml-4">
+                            {STAGES.map((stage, idx) => {
+                                const isActive = activeStageIdx === idx;
+                                const hasCompiledData = lastResult !== null;
+                                const disabled = !hasCompiledData || (lastResult.error && idx > 0);
+
+                                return (
+                                    <button 
+                                        key={stage}
+                                        onClick={() => setActiveStageIdx(idx)}
+                                        disabled={disabled}
+                                        className={`flex items-center gap-2 px-3 py-1.5 transition-all duration-150 rounded-full border border-transparent
+                                          ${isActive 
+                                            ? 'bg-[#e9d5ff]/10 text-[#e9d5ff] border-[#e9d5ff]/30 shadow-[0_0_15px_rgba(233,213,255,0.05)]' 
+                                            : 'text-on-surface-variant/60 hover:text-[#e9d5ff]'
+                                          }
+                                          ${disabled ? 'opacity-30 cursor-not-allowed hidden 2xl:flex' : 'cursor-pointer'}
+                                        `}
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
+                                        <span className="font-mono text-[9px] uppercase tracking-tighter font-bold whitespace-nowrap">{stage}</span>
+                                    </button>
+                                )
+                            })}
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-4">
+                        <div className="hidden lg:flex items-center gap-4 py-1 px-3 rounded-full bg-surface-container-highest/10 border border-white/5 mr-4">
+                            <div className="flex items-center gap-2 pr-4 border-r border-white/10">
+                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Arch</span>
+                                <span className="text-[10px] font-mono text-secondary-fixed">x86-64</span>
+                            </div>
+                            <div className="flex items-center gap-2 pl-2">
+                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Stack</span>
+                                <span className="text-[10px] font-mono text-primary-fixed">{lastResult?.totalFrameSize ?? 0} B</span>
+                            </div>
+                        </div>
+
                         <button 
                             onClick={handleCompile}
                             disabled={isCompiling || isWasmLoading}
@@ -289,34 +331,6 @@ function App() {
                             <span>{isWasmLoading ? "INITIALIZING..." : "COMPILE"}</span>
                         </button>
                     </div>
-                </div>
-
-                {/* Subheader: Stage Selection */}
-                <div className="flex justify-center items-center gap-1 px-8 pb-3 bg-[#0c0d18]/50">
-                    {STAGES.map((stage, idx) => {
-                        const isActive = activeStageIdx === idx;
-                        const hasCompiledData = lastResult !== null;
-                        const disabled = !hasCompiledData || (lastResult.error && idx > 0);
-
-                        return (
-                            <button 
-                                key={stage}
-                                onClick={() => setActiveStageIdx(idx)}
-                                disabled={disabled}
-                                className={`flex items-center gap-2 px-4 py-1.5 transition-all duration-150 rounded-full border border-transparent
-                                  ${isActive 
-                                    ? 'bg-[#e9d5ff]/10 text-[#e9d5ff] border-[#e9d5ff]/30 shadow-[0_0_15px_rgba(233,213,255,0.05)]' 
-                                    : 'text-on-surface-variant/60 hover:text-[#e9d5ff]'
-                                  }
-                                  ${disabled ? 'opacity-30 cursor-not-allowed hidden md:flex' : 'cursor-pointer'}
-                                `}
-                            >
-                                <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
-                                <span className="font-mono text-[10px] uppercase tracking-tighter font-bold">{stage}</span>
-                                {isActive && <div className="w-1 h-1 rounded-full bg-[#e9d5ff] animate-pulse"></div>}
-                            </button>
-                        )
-                    })}
                 </div>
             </header>
 
