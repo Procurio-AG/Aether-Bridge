@@ -1,28 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;500;700&family=JetBrains+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .syntax-keyword { @apply text-[#e9d5ff]; }
-  .syntax-string { @apply text-[#c3ecd7]; }
-  .syntax-variable { @apply text-[#f3f7ff]; }
-  .syntax-function { @apply text-[#FCE7F3]; }
+:root {
+  --surface-dim: #0f131c;
+  --surface-container: #1c1f29;
+  --surface-container-high: #262a34;
+  --surface-container-highest: #31353f;
+  --primary: #bdc2ff;
+  --primary-container: #818cf8;
+  --accent-glow: rgba(129, 140, 248, 0.25);
+  --outline-variant: rgba(144, 143, 158, 0.15);
+  --on-surface: #dfe2ef;
+  --on-surface-variant: #c6c5d5;
 }
 
 @layer base {
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  body {
+    @apply bg-[#0f131c] text-on-surface overflow-hidden antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #11121e; }
-::-webkit-scrollbar-thumb { background: #464753; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #e9d5ff; }
+@layer utilities {
+  .celestial-bg {
+    background: radial-gradient(circle at 50% -20%, #1c1f29, #0f131c 80%);
+  }
 
-body {
-  @apply bg-surface font-body text-on-surface overflow-hidden;
+  .ambient-bloom {
+    box-shadow: 0 0 30px rgba(129, 140, 248, 0.15), 0 0 60px rgba(129, 140, 248, 0.05);
+  }
+
+  .no-line-card {
+    @apply bg-surface-container rounded-xl transition-all duration-300;
+  }
+
+  .glass-panel {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+  }
 }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(144, 143, 158, 0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 #root {
   @apply h-screen w-screen flex flex-col;

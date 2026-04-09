@@ -14,44 +14,49 @@ import 'reactflow/dist/style.css';
 import { transformAST } from '../utils/astToGraph';
 
 // -- Custom Node Component ---------------------------------------------------
-const ASTNode = ({ data }: NodeProps) => {
+const ASTNodeContent = ({ data }: NodeProps) => {
   const { label, type, value, isObject } = data;
   
-  let nodeColor = 'border-outline-variant/20';
-  let typeColor = 'text-primary-dim';
-  
+  let typeColor = 'text-primary';
   if (type.includes('Decl')) typeColor = 'text-secondary-fixed';
   else if (type.includes('Expr')) typeColor = 'text-tertiary-fixed';
-  else if (type === 'Program') typeColor = 'text-primary font-black';
 
   return (
-    <div className={`px-4 py-2 rounded-lg bg-[#0c0d18] border ${nodeColor} shadow-2xl min-w-[150px] font-mono`}>
-      <Handle type="target" position={Position.Top} className="!bg-primary/40 border-none !w-1.5 !h-1.5" />
+    <div className="no-line-card hover:ambient-bloom group overflow-hidden border border-white/[0.03] shadow-lg min-w-[180px]">
+      <Handle type="target" position={Position.Top} className="!bg-primary/40 border-none !w-1 !h-1" />
       
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[9px] uppercase font-bold tracking-widest text-on-surface-variant/60">{label}</span>
-          {type && (
-            <span className={`text-[8px] font-black tracking-tighter uppercase px-1.5 py-0.5 rounded bg-white/5 ${typeColor}`}>
-              {type}
-            </span>
-          )}
-        </div>
-        
-        {value && (
-          <div className="text-[11px] text-[#c3ecd7] font-medium break-all mt-1">
+      {/* Header: Node Type */}
+      <div className="bg-surface-container-high px-3 py-1.5 flex items-center justify-between gap-4 border-b border-white/[0.02]">
+        <span className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-on-surface-variant/80">
+          {label}
+        </span>
+        {type && (
+          <span className={`text-[9px] font-display font-black tracking-tighter uppercase ${typeColor}`}>
+            {type}
+          </span>
+        )}
+      </div>
+
+      {/* Body: Value / Properties */}
+      <div className="bg-surface-dim p-3">
+        {value ? (
+          <div className="text-[12px] text-[#c3ecd7] font-mono leading-relaxed break-all">
             {value}
+          </div>
+        ) : (
+          <div className="text-[10px] text-on-surface-variant/40 italic font-mono uppercase tracking-widest">
+            {isObject ? 'Node Structure' : 'Empty'}
           </div>
         )}
       </div>
 
-      {isObject && <Handle type="source" position={Position.Bottom} className="!bg-secondary/40 border-none !w-1.5 !h-1.5" />}
+      {isObject && <Handle type="source" position={Position.Bottom} className="!bg-secondary/40 border-none !w-1 !h-1" />}
     </div>
   );
 };
 
 const nodeTypes = {
-  custom: ASTNode,
+  custom: ASTNodeContent,
 };
 
 // -- Main Viewer Content -----------------------------------------------------
@@ -80,7 +85,7 @@ function ASTViewerContent({ ast, expandToggleSeq }: ASTViewerContentProps) {
   }, [ast, expandToggleSeq, updateGraph]);
 
   return (
-    <div className="w-full h-full bg-[#0c0d18]/40 relative">
+    <div className="w-full h-full celestial-bg relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -92,15 +97,15 @@ function ASTViewerContent({ ast, expandToggleSeq }: ASTViewerContentProps) {
         minZoom={0.1}
         maxZoom={4}
       >
-        <Background color="rgba(255,255,255,0.05)" gap={20} size={1} />
-        <Controls showInteractive={false} className="!bg-[#1c1d2b] !border-outline-variant/20 !fill-white/60" />
+        <Background color="rgba(144, 143, 158, 0.05)" gap={24} size={1} />
+        <Controls showInteractive={false} className="!bg-[#1c1d2b] !border-white/5 !fill-white/60" />
       </ReactFlow>
 
       {/* Manual Reset Button HUD */}
-      <div className="absolute bottom-6 right-20 z-10">
+      <div className="absolute bottom-6 right-10 z-10">
           <button 
               onClick={() => fitView({ duration: 800 })}
-              className="bg-surface-container-highest/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-[10px] font-bold text-primary hover:text-primary-fixed transition-all uppercase tracking-widest shadow-2xl"
+              className="glass-panel px-5 py-2 rounded-full border border-white/5 text-[10px] font-display font-bold text-primary hover:text-primary-container transition-all uppercase tracking-[0.2em] shadow-2xl"
           >
               Reset View
           </button>

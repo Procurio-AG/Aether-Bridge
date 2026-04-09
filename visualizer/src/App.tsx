@@ -274,17 +274,17 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen w-full font-body bg-surface text-on-surface overflow-hidden">
+    <div className="flex h-screen w-full font-body celestial-bg text-on-surface overflow-hidden">
         {/* Main Workspace */}
         <main className="flex-1 flex flex-col min-w-0 relative">
             {/* TopAppBar - Now includes Stage Selection */}
-            <header className="bg-[#0c0d18] flex flex-col w-full shrink-0 border-b border-outline-variant/10 shadow-2xl z-20">
+            <header className="bg-surface-container flex flex-col w-full shrink-0 border-b border-white/[0.02] shadow-2xl z-20">
                 <div className="flex justify-between items-center px-8 py-3">
                     <div className="flex items-center gap-6">
-                        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] font-headline tracking-tighter">Aether</h1>
+                        <h1 className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container tracking-tighter">Aether</h1>
                         
                         {/* Integrated Stage Selection */}
-                        <div className="flex items-center gap-1 py-1 px-1 rounded-full bg-surface-container-highest/20 border border-white/5 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none">
+                        <div className="flex items-center gap-1 py-1 px-1 rounded-full bg-surface-dim/40 border border-white/5 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none">
                             {STAGES.map((stage, idx) => {
                                 const isActive = activeStageIdx === idx;
                                 const hasCompiledData = lastResult !== null;
@@ -295,16 +295,16 @@ function App() {
                                         key={stage}
                                         onClick={() => setActiveStageIdx(idx)}
                                         disabled={disabled}
-                                        className={`flex items-center gap-2 px-3 py-1.5 transition-all duration-150 rounded-full border border-transparent shrink-0
+                                        className={`flex items-center gap-2 px-4 py-1.5 transition-all duration-300 rounded-full shrink-0
                                           ${isActive 
-                                            ? 'bg-[#e9d5ff]/10 text-[#e9d5ff] border-[#e9d5ff]/30 shadow-[0_0_15px_rgba(233,213,255,0.05)]' 
-                                            : 'text-on-surface-variant/60 hover:text-[#e9d5ff]'
+                                            ? 'bg-primary/10 text-primary ambient-bloom' 
+                                            : 'text-on-surface-variant/60 hover:text-primary hover:bg-white/5'
                                           }
                                           ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
                                         `}
                                     >
                                         <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
-                                        <span className="font-mono text-[9px] uppercase tracking-tighter font-bold whitespace-nowrap">{stage}</span>
+                                        <span className="font-display text-[9px] uppercase tracking-[0.1em] font-bold whitespace-nowrap">{stage}</span>
                                     </button>
                                 )
                             })}
@@ -326,10 +326,10 @@ function App() {
                         <button 
                             onClick={handleCompile}
                             disabled={isCompiling || isWasmLoading}
-                            className="bg-gradient-to-r from-[#e9d5ff] to-[#ab99c0] text-on-primary-container font-bold px-6 py-1.5 rounded-full text-xs shadow-[0_0_30px_rgba(233,213,255,0.15)] hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer active:scale-95"
+                            className="bg-gradient-to-r from-primary to-primary-container text-[#101b8a] font-display font-bold px-6 py-1.5 rounded-full text-[10px] tracking-widest ambient-bloom hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer active:scale-95"
                         >
                             {isCompiling || isWasmLoading ? (
-                                <><div className="w-3.5 h-3.5 rounded-full border-2 border-on-primary-container border-t-transparent animate-spin"></div></>
+                                <><div className="w-3.5 h-3.5 rounded-full border-2 border-[#101b8a] border-t-transparent animate-spin"></div></>
                             ) : <span className="material-symbols-outlined text-sm">bolt</span>}
                             <span>{isWasmLoading ? "INITIALIZING..." : "COMPILE"}</span>
                         </button>
@@ -343,25 +343,25 @@ function App() {
                 <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
                     
                     {/* Source Editor Panel */}
-                    <section className="col-span-12 lg:col-span-6 flex flex-col bg-surface-container-high rounded-xl overflow-hidden shadow-2xl border border-white/5">
-                        <div className="px-5 py-3 flex items-center justify-between bg-surface-container-highest/50">
-                            <span className="font-label text-[10px] uppercase tracking-wider text-primary">Source: Main.ae</span>
-                            <span className="material-symbols-outlined text-on-surface-variant text-sm">edit_note</span>
+                    <section className="col-span-12 lg:col-span-6 flex flex-col no-line-card overflow-hidden shadow-2xl border border-white/[0.02]">
+                        <div className="px-5 py-3 flex items-center justify-between bg-surface-container-high/40">
+                            <span className="font-display text-[10px] uppercase font-bold tracking-[0.2em] text-primary">Source: Main.ae</span>
+                            <span className="material-symbols-outlined text-on-surface-variant text-sm opacity-40">edit_note</span>
                         </div>
-                        <div className="flex-1 relative bg-[#0c0d18]/50">
+                        <div className="flex-1 relative bg-surface-dim/30">
                             <SourceEditor
                               defaultValue={DEFAULT_CODE}
                               onChange={setCode}
                             />
                         </div>
                     </section>
-
+                    
                     {/* Visualization Panel */}
-                    <section className="col-span-12 lg:col-span-6 bg-surface-container rounded-xl overflow-hidden relative flex flex-col border border-white/5">
-                        <div className="px-5 py-3 flex items-center justify-between border-b border-outline-variant/5">
+                    <section className="col-span-12 lg:col-span-6 flex flex-col no-line-card overflow-hidden shadow-2xl border border-white/[0.02]">
+                        <div className="px-5 py-3 flex items-center justify-between bg-surface-container-high/40 border-b border-white/[0.01]">
                             <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${lastResult?.error ? 'bg-error' : 'bg-secondary'}`}></div>
-                                <span className="font-headline font-bold text-sm tracking-tight">{STAGE_ICONS[activeStage].toUpperCase()} - {activeStage.toUpperCase()} VIEW</span>
+                                <div className={`w-1.5 h-1.5 rounded-full ${lastResult?.error ? 'bg-error' : 'bg-primary'}`}></div>
+                                <span className="font-display font-bold text-[10px] tracking-[0.15em] uppercase text-on-surface-variant text-sm tracking-tight">{STAGE_ICONS[activeStage].toUpperCase()} / {activeStage.toUpperCase()}</span>
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => { setAstIsExpanded(true); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Expand All AST Branches">
@@ -393,15 +393,15 @@ function App() {
                 {/* Compilation Logs Footer - Now Resizable */}
                 <section 
                     style={{ height: `${logsHeight}px` }}
-                    className="bg-surface-container-low border-t border-outline-variant/10 flex flex-col overflow-hidden shrink-0 relative"
+                    className="no-line-card flex flex-col overflow-hidden shrink-0 relative border border-white/[0.02] shadow-2xl"
                 >
-                    <div className="px-4 py-1.5 flex items-center justify-between bg-surface-container/50 border-b border-outline-variant/5">
-                        <div className="flex items-center gap-3">
-                            <span className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant font-bold">Diagnostics & Logs</span>
+                    <div className="px-5 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-white/[0.01]">
+                        <div className="flex items-center gap-4">
+                            <span className="font-display text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Diagnostics & Logs</span>
                             <div className="flex items-center gap-2">
-                                <span className={`flex h-1.5 w-1.5 rounded-full ${lastResult ? (lastResult.error ? 'bg-error' : 'bg-secondary') : 'bg-outline-variant'}`}></span>
-                                <span className={`text-[9px] font-mono font-bold ${lastResult ? (lastResult.error ? 'text-error' : 'text-secondary') : 'text-outline-variant'}`}>
-                                    {lastResult ? (lastResult.error ? 'FAILED' : 'SUCCESS') : 'IDLE'}
+                                <span className={`flex h-1.5 w-1.5 rounded-full ${lastResult ? (lastResult.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary shadow-[0_0_8px_rgba(189,194,255,0.4)]') : 'bg-outline-variant'}`}></span>
+                                <span className={`text-[9px] font-display font-black tracking-widest ${lastResult ? (lastResult.error ? 'text-error' : 'text-primary') : 'text-outline-variant'}`}>
+                                    {lastResult ? (lastResult.error ? 'HALTED' : 'READY') : 'IDLE'}
                                 </span>
                             </div>
                         </div>
