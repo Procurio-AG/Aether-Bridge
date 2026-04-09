@@ -22,14 +22,22 @@ remote("10.0.0.101") {
 }
 `;
 
-type Stage = 'Lexical Analyzer' | 'Syntax Analyzer' | 'Semantic Analyzer' | 'Intermediate Code Generator' | 'Assembly Code';
-const STAGES: Stage[] = ['Lexical Analyzer', 'Syntax Analyzer', 'Semantic Analyzer', 'Intermediate Code Generator', 'Assembly Code'];
+type Stage = 'Lexical Analyzer' | 'Syntax Analyzer' | 'Semantic Analyzer' | 'Intermediate Code Generator' | 'Optimized Intermediate Code' | 'Assembly Code';
+const STAGES: Stage[] = [
+  'Lexical Analyzer', 
+  'Syntax Analyzer', 
+  'Semantic Analyzer', 
+  'Intermediate Code Generator', 
+  'Optimized Intermediate Code', 
+  'Assembly Code'
+];
 
 const STAGE_ICONS: Record<Stage, string> = {
   'Lexical Analyzer': 'code',
   'Syntax Analyzer': 'account_tree',
   'Semantic Analyzer': 'schema',
   'Intermediate Code Generator': 'terminal',
+  'Optimized Intermediate Code': 'auto_awesome',
   'Assembly Code': 'memory'
 };
 
@@ -41,7 +49,6 @@ function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [astExpandToggle, setAstExpandToggle] = useState<number>(0);
   const [astIsExpanded, setAstIsExpanded] = useState<boolean>(true);
-  const [showOptimized, setShowOptimized] = useState<boolean>(true);
   
   // Resizing state
   const [logsHeight, setLogsHeight] = useState(140);
@@ -140,7 +147,7 @@ function App() {
 
         setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] SUCCESS: Full AST-to-Assembly pipeline completed in Wasm.`]);
         setLastResult(nextResult);
-        setActiveStageIdx(4); // Auto-jump to Assembly Code
+        setActiveStageIdx(5); // Auto-jump to Assembly Code
       } else {
         // Handle Frontend failure
         const hasLexErrors = res.bag.diagnostics.some(d => d.message.toLowerCase().includes("token") || d.message.toLowerCase().includes("illegal"));
@@ -236,27 +243,23 @@ function App() {
         );
       case 'Intermediate Code Generator':
         return (
-          <div className="absolute inset-0 flex flex-col">
-             <div className="flex items-center gap-4 px-6 py-2 bg-surface-container-highest/20 border-b border-outline-variant/10">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">View Mode:</span>
-                <div className="flex bg-[#0c0d18] rounded-full p-0.5 border border-white/5">
-                    <button 
-                        onClick={() => setShowOptimized(false)}
-                        className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${!showOptimized ? 'bg-primary text-on-primary' : 'text-on-surface-variant/60 hover:text-on-surface'}`}
-                    >RAW TAC</button>
-                    <button 
-                        onClick={() => setShowOptimized(true)}
-                        className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${showOptimized ? 'bg-secondary text-on-secondary' : 'text-on-surface-variant/60 hover:text-on-surface'}`}
-                    >OPTIMIZED</button>
-                </div>
-                {showOptimized && lastResult.optStats && (
-                    <span className="text-[9px] text-secondary font-mono ml-auto">
+          <div className="absolute inset-0 p-6 font-mono text-sm overflow-auto text-tertiary scrollbar-hide">
+             <pre>{lastResult.rawTac}</pre>
+          </div>
+        );
+      case 'Optimized Intermediate Code':
+        return (
+          <div className="absolute inset-0 flex flex-col font-mono text-sm overflow-hidden text-secondary-fixed">
+             <div className="px-6 py-2 bg-surface-container-highest/20 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#ab99c0]">Aggressive Constant Folding Results</span>
+                {lastResult.optStats && (
+                    <span className="text-[9px] opacity-70">
                         Folds: {lastResult.optStats.constantsFolded} | DCE: {lastResult.optStats.deadCodeRemoved}
                     </span>
                 )}
              </div>
-             <div className="flex-1 p-6 font-mono text-sm overflow-auto text-tertiary scrollbar-hide">
-                <pre>{showOptimized ? lastResult.optTac : lastResult.rawTac}</pre>
+             <div className="flex-1 p-6 overflow-auto scrollbar-hide">
+                <pre>{lastResult.optTac}</pre>
              </div>
           </div>
         );
