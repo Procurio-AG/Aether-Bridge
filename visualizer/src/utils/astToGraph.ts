@@ -57,7 +57,7 @@ export function transformAST(ast: any): GraphData {
         source: parentId,
         target: id,
         animated: true,
-        style: { stroke: 'rgba(144, 143, 158, 0.15)' }
+        style: { stroke: 'rgba(169, 180, 185, 0.3)', strokeWidth: 2 }
       });
     }
 
