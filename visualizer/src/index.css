@@ -1,22 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;500;700&family=JetBrains+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --surface: #f6fafd;
-  --surface-container: #e7eff4;
-  --surface-container-high: #e1e9ef;
-  --surface-container-highest: #d9e4ea;
-  --on-surface: #2a3439;
-  --on-surface-variant: #566166;
-  --primary: #4c645b;
-  --primary-container: #cde9dc;
-  --secondary: #65597c;
-  --secondary-container: #eaddff;
-  --outline-variant: rgba(169, 180, 185, 0.15);
-}
 
 @layer base {
   body {
@@ -30,28 +16,31 @@
 }
 
 @layer utilities {
+  .inner-shadow-clay {
+    box-shadow: inset 4px 4px 8px rgba(255, 255, 255, 0.5), 
+                inset -4px -4px 8px rgba(169, 180, 185, 0.3);
+  }
+
+  .inner-shadow-recessed {
+    box-shadow: inset 6px 6px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .pipeline-pipe {
+    height: 8px;
+    background: #d1dce2;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.05);
+  }
+
   .clay-card {
-    @apply bg-surface-container-highest rounded-[32px] transition-all duration-300;
-    box-shadow: 
-        0 20px 40px rgba(42, 52, 57, 0.06),
-        inset 4px 4px 8px rgba(255, 255, 255, 0.7),
-        inset -4px -4px 8px rgba(169, 180, 185, 0.25);
+    box-shadow: 0px 20px 40px rgba(42, 52, 57, 0.08),
+                inset 4px 4px 8px rgba(255, 255, 255, 0.5),
+                inset -4px -4px 8px rgba(169, 180, 185, 0.3);
   }
 
-  .clay-well {
-    @apply bg-[#e9eff2] rounded-[24px] transition-all duration-300;
-    box-shadow: 
-        inset 6px 6px 12px rgba(0, 0, 0, 0.06),
-        inset -6px -6px 12px rgba(255, 255, 255, 0.4);
-  }
-
-  .ambient-bloom {
-    box-shadow: 0 0 30px rgba(76, 100, 91, 0.1), 0 0 60px rgba(76, 100, 91, 0.05);
-  }
-
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
+  .clay-chip {
+    box-shadow: 0px 4px 8px rgba(42, 52, 57, 0.04),
+                inset 2px 2px 4px rgba(255, 255, 255, 0.6),
+                inset -2px -2px 4px rgba(169, 180, 185, 0.2);
   }
 }
 
