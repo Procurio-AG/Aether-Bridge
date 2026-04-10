@@ -6,8 +6,8 @@ export interface GraphData {
   edges: Edge[];
 }
 
-const NODE_WIDTH = 180;
-const NODE_HEIGHT = 50;
+const NODE_WIDTH = 250;
+const NODE_HEIGHT = 80;
 
 /**
  * Transforms a nested AST object into a React Flow graph structure.
@@ -26,10 +26,17 @@ export function transformAST(ast: any): GraphData {
     
     // Label logic: Property Name + Type or Value
     let label = name || 'PROGRAM';
-    let value = '';
+    let properties: Record<string, string> = {};
 
     if (typeof data !== 'object') {
-      value = String(data);
+      properties['VALUE'] = String(data);
+    } else {
+      // For objects, extract prime primitive properties for the 'Perfect Node' view
+      Object.entries(data).forEach(([k, v]) => {
+        if (k !== 'loc' && k !== 'type' && typeof v !== 'object') {
+          properties[k.toUpperCase()] = String(v);
+        }
+      });
     }
 
     nodes.push({
@@ -37,10 +44,10 @@ export function transformAST(ast: any): GraphData {
       data: { 
         label, 
         type: nodeType, 
-        value,
+        properties,
         isObject: typeof data === 'object' && data !== null
       },
-      position: { x: 0, y: 0 }, // Will be set by dagre
+      position: { x: 0, y: 0 },
       type: 'custom'
     });
 
@@ -50,7 +57,7 @@ export function transformAST(ast: any): GraphData {
         source: parentId,
         target: id,
         animated: true,
-        style: { stroke: 'rgba(233, 213, 255, 0.2)' }
+        style: { stroke: 'rgba(144, 143, 158, 0.15)' }
       });
     }
 
@@ -66,7 +73,7 @@ export function transformAST(ast: any): GraphData {
 
   // Dagre Layout Calculation
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: 'TB', nodesep: 70, ranksep: 100 });
+  g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 100 });
   g.setDefaultEdgeLabel(() => ({}));
 
   nodes.forEach(node => {

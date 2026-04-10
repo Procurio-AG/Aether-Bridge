@@ -14,38 +14,48 @@ import 'reactflow/dist/style.css';
 import { transformAST } from '../utils/astToGraph';
 
 // -- Custom Node Component ---------------------------------------------------
+const truncate = (val: string, len: number) => {
+  if (val.length <= len) return val;
+  return val.slice(0, len) + '...';
+};
+
 const ASTNodeContent = ({ data }: NodeProps) => {
-  const { label, type, value, isObject } = data;
+  const { label, type, properties, isObject } = data;
   
   let typeColor = 'text-primary';
   if (type.includes('Decl')) typeColor = 'text-secondary-fixed';
   else if (type.includes('Expr')) typeColor = 'text-tertiary-fixed';
 
   return (
-    <div className="no-line-card hover:ambient-bloom group overflow-hidden border border-white/[0.03] shadow-lg min-w-[180px]">
+    <div className="no-line-card hover:ambient-bloom group overflow-hidden border border-white/[0.03] shadow-lg w-[250px] transition-transform duration-200">
       <Handle type="target" position={Position.Top} className="!bg-primary/40 border-none !w-1 !h-1" />
       
       {/* Header: Node Type */}
-      <div className="bg-surface-container-high px-3 py-1.5 flex items-center justify-between gap-4 border-b border-white/[0.02]">
-        <span className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-on-surface-variant/80">
+      <div className="bg-surface-container-high px-4 py-2 flex items-center justify-between gap-4 border-b border-white/[0.02]">
+        <span className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-on-surface-variant/80 truncate">
           {label}
         </span>
         {type && (
-          <span className={`text-[9px] font-display font-black tracking-tighter uppercase ${typeColor}`}>
+          <span className={`text-[9px] font-display font-black tracking-tighter uppercase shrink-0 ${typeColor}`}>
             {type}
           </span>
         )}
       </div>
 
-      {/* Body: Value / Properties */}
-      <div className="bg-surface-dim p-3">
-        {value ? (
-          <div className="text-[12px] text-[#c3ecd7] font-mono leading-relaxed break-all">
-            {value}
-          </div>
+      {/* Body: Key-Value Properties (Inter) */}
+      <div className="bg-surface-dim p-4 flex flex-col gap-2">
+        {Object.entries(properties || {}).length > 0 ? (
+          Object.entries(properties).map(([key, val]) => (
+            <div key={key} className="flex flex-col gap-0.5">
+               <span className="text-[8px] font-display font-bold text-on-surface-variant/40 uppercase tracking-widest">{key}</span>
+               <span className="text-[11px] font-body text-primary-dim leading-snug break-all">
+                {truncate(String(val), 80)}
+               </span>
+            </div>
+          ))
         ) : (
-          <div className="text-[10px] text-on-surface-variant/40 italic font-mono uppercase tracking-widest">
-            {isObject ? 'Node Structure' : 'Empty'}
+          <div className="text-[10px] text-on-surface-variant/30 italic font-display uppercase tracking-widest text-center py-2">
+            {isObject ? 'Structural Container' : 'No Attributes'}
           </div>
         )}
       </div>
