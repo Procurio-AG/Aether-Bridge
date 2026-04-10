@@ -63,10 +63,10 @@ export const SourceEditor = memo(({ defaultValue, onChange }: SourceEditorProps)
             onChange={handleEditorChange}
             options={{
                 minimap: { enabled: false },
-                fontSize: 13,
-                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                fontSize: 14,
+                fontFamily: "'Lexend', sans-serif",
                 fontLigatures: true,
-                lineHeight: 22,
+                lineHeight: 24,
                 padding: { top: 16 },
                 scrollBeyondLastLine: false,
                 cursorSmoothCaretAnimation: "on",

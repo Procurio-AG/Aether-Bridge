@@ -1,14 +1,16 @@
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useState } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
-  useNodesState, 
+  useNodesState,
   useEdgesState,
   Handle,
+  Node,
   Position,
   NodeProps,
   useReactFlow,
-  ReactFlowProvider
+  ReactFlowProvider,
+  NodeMouseHandler
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { transformAST } from '../utils/astToGraph';
@@ -69,7 +71,13 @@ const ASTNodeContent = ({ data }: NodeProps) => {
 function ASTViewerContent({ ast, expandToggleSeq }: { ast: any; expandToggleSeq: number }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNode, setSelectedNode] = useState<any>(null);
   const { fitView } = useReactFlow();
+
+  // Clear selection when the graph context changes (e.g. stage transition)
+  useEffect(() => {
+    setSelectedNode(null);
+  }, [ast, expandToggleSeq]);
 
   // Memoize node types to prevent expensive remounts during pan/zoom
   const nodeTypes = useMemo(() => ({
@@ -90,13 +98,18 @@ function ASTViewerContent({ ast, expandToggleSeq }: { ast: any; expandToggleSeq:
     updateGraph();
   }, [ast, expandToggleSeq, updateGraph]);
 
+  const onNodeClick: NodeMouseHandler = useCallback((_event, node) => {
+    setSelectedNode(node);
+  }, []);
+
   return (
-    <div className="w-full h-full bg-[#f6fafd] relative">
+    <div className="w-full h-full bg-[#f6fafd] relative font-display">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         fitView
         className="scrollbar-hide"
@@ -107,8 +120,8 @@ function ASTViewerContent({ ast, expandToggleSeq }: { ast: any; expandToggleSeq:
         <Controls showInteractive={false} className="!bg-white/80 !border-[#2a3439]/5 !fill-[#2a3439]/60 !shadow-lg rounded-lg overflow-hidden" />
       </ReactFlow>
 
-      {/* Manual Reset Button HUD */}
-      <div className="absolute bottom-6 right-10 z-10">
+      {/* Manual Reset Button HUD - Relocated to Bottom-Left */}
+      <div className="absolute bottom-6 left-10 z-10">
           <button 
               onClick={() => fitView({ duration: 800 })}
               className="bg-white/90 backdrop-blur-md px-6 py-2.5 rounded-full border border-[#2a3439]/5 text-[10px] font-display font-bold text-[#4c645b] hover:text-[#4c645b]/80 hover:scale-105 transition-all uppercase tracking-[0.2em] shadow-xl"
@@ -116,6 +129,39 @@ function ASTViewerContent({ ast, expandToggleSeq }: { ast: any; expandToggleSeq:
               Reset View
           </button>
       </div>
+
+      {/* Metadata Bento - Refinement Node Inspector (Bottom-Right) */}
+      {selectedNode && (
+        <div className="absolute bottom-6 right-6 w-72 p-6 bg-surface-container-highest/60 backdrop-blur-xl rounded-[24px] clay-card z-20 animate-in fade-in slide-in-from-bottom-4 duration-300">
+           <div className="flex items-center justify-between mb-4 border-b border-[#2a3439]/5 pb-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Node Inspector</span>
+              <button onClick={() => setSelectedNode(null)} className="material-symbols-outlined text-xs text-on-surface-variant hover:text-error transition-colors">close</button>
+           </div>
+           
+           <div className="space-y-4">
+              <div>
+                <span className="text-[8px] font-bold text-on-surface-variant/40 uppercase tracking-widest block mb-1">Type Signature</span>
+                <span className="text-[12px] font-display font-bold text-secondary">{selectedNode.data.type || 'ROOT'}</span>
+              </div>
+
+              {Object.entries(selectedNode.data.properties || {}).length > 0 ? (
+                <div className="space-y-3">
+                   <span className="text-[8px] font-bold text-on-surface-variant/40 uppercase tracking-widest block border-t border-[#2a3439]/5 pt-3">Structural Data</span>
+                   {Object.entries(selectedNode.data.properties).map(([k, v]) => (
+                      <div key={k} className="flex justify-between items-center gap-4">
+                         <span className="text-[9px] font-bold text-on-surface-variant/60 uppercase">{k}</span>
+                         <span className="text-[9px] font-sans font-bold text-primary truncate max-w-[140px]">{String(v)}</span>
+                      </div>
+                   ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center">
+                  <span className="text-[9px] italic text-on-surface-variant/30 uppercase tracking-tighter">Terminal node with no internal state</span>
+                </div>
+              )}
+           </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -129,7 +175,7 @@ export interface ASTViewerProps {
 
 export function ASTViewer({ ast, expandToggleSeq }: ASTViewerProps) {
     if (!ast) return (
-        <div className="h-full flex items-center justify-center opacity-20 italic text-xs font-mono tracking-widest">
+        <div className="h-full flex items-center justify-center opacity-20 italic text-xs font-display tracking-widest text-[#2a3439]">
             NO ACTIVE AST STRUCTURE FOUND
         </div>
     );

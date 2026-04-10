@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tactile Logic Engine - Compiler Visualizer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-dim": "#40584f",
+                      "on-primary": "#e4fff3",
+                      "error-container": "#fa746f",
+                      "on-secondary": "#fdf7ff",
+                      "surface-container-highest": "#d9e4ea",
+                      "outline-variant": "#a9b4b9",
+                      "inverse-surface": "#0a0f11",
+                      "secondary-dim": "#594e6f",
+                      "on-tertiary-container": "#3f515c",
+                      "inverse-on-surface": "#999da0",
+                      "surface-bright": "#f6fafd",
+                      "on-primary-fixed": "#2c443b",
+                      "surface-dim": "#d1dce2",
+                      "surface-container-low": "#eef4f9",
+                      "on-error": "#fff7f6",
+                      "on-secondary-fixed-variant": "#615678",
+                      "inverse-primary": "#e1fdf0",
+                      "primary-fixed": "#cde9dc",
+                      "on-secondary-fixed": "#443a5a",
+                      "on-primary-container": "#3f574e",
+                      "background": "#f6fafd",
+                      "tertiary-fixed": "#cddfee",
+                      "tertiary-container": "#cddfee",
+                      "surface-container-high": "#e1e9ef",
+                      "on-surface-variant": "#566166",
+                      "on-surface": "#2a3439",
+                      "secondary-container": "#eaddff",
+                      "error": "#a83836",
+                      "surface-container": "#e7eff4",
+                      "outline": "#727c82",
+                      "surface": "#f6fafd",
+                      "error-dim": "#67040d",
+                      "surface-tint": "#4c645b",
+                      "primary": "#4c645b",
+                      "secondary": "#65597c",
+                      "surface-container-lowest": "#ffffff",
+                      "on-background": "#2a3439",
+                      "on-secondary-container": "#574c6d",
+                      "primary-fixed-dim": "#c0dacf",
+                      "secondary-fixed-dim": "#ddcef6",
+                      "surface-variant": "#d9e4ea",
+                      "secondary-fixed": "#eaddff",
+                      "tertiary-dim": "#445561",
+                      "on-tertiary-fixed": "#2d3e49",
+                      "tertiary": "#50616d",
+                      "on-tertiary": "#f4f9ff",
+                      "primary-container": "#cde9dc",
+                      "on-tertiary-fixed-variant": "#495a66",
+                      "on-primary-fixed-variant": "#486157",
+                      "tertiary-fixed-dim": "#bfd1df",
+                      "on-error-container": "#6e0a12"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Lexend"],
+                      "body": ["Lexend"],
+                      "label": ["Lexend"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Lexend', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .inner-shadow-clay {
+            box-shadow: inset 4px 4px 8px rgba(255, 255, 255, 0.5), 
+                        inset -4px -4px 8px rgba(169, 180, 185, 0.3);
+        }
+        .inner-shadow-recessed {
+            box-shadow: inset 6px 6px 12px rgba(0, 0, 0, 0.05);
+        }
+        .pipeline-pipe {
+            height: 8px;
+            background: #d1dce2;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.05);
+        }
+        .clay-card {
+            box-shadow: 0px 20px 40px rgba(42, 52, 57, 0.08),
+                        inset 4px 4px 8px rgba(255, 255, 255, 0.5),
+                        inset -4px -4px 8px rgba(169, 180, 185, 0.3);
+        }
+        .clay-chip {
+            box-shadow: 0px 4px 8px rgba(42, 52, 57, 0.04),
+                        inset 2px 2px 4px rgba(255, 255, 255, 0.6),
+                        inset -2px -2px 4px rgba(169, 180, 185, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden pb-24">
+<!-- TopAppBar Shell -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-3 rounded-full mt-4 mx-auto max-w-[95%] bg-[#f6fafd] dark:bg-[#1a1c1e] shadow-[0px_20px_40px_rgba(42,52,57,0.08)] inner-shadow-clay">
+<div class="text-2xl font-bold text-[#4c645b] dark:text-[#8FA99E] tracking-tight">
+            Tactile Logic Engine
+        </div>
+<div class="hidden md:flex items-center gap-1">
+<a class="text-[#4c645b] dark:text-[#cde9dc] bg-[#d9e4ea] dark:bg-[#3d4b50] rounded-full px-6 py-2 shadow-inner font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">Lexical</a>
+<a class="text-[#566166] dark:text-[#a9b4b9] px-4 py-2 font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">Syntax</a>
+<a class="text-[#566166] dark:text-[#a9b4b9] px-4 py-2 font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">Semantic</a>
+<a class="text-[#566166] dark:text-[#a9b4b9] px-4 py-2 font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">IR</a>
+<a class="text-[#566166] dark:text-[#a9b4b9] px-4 py-2 font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">Optimized</a>
+<a class="text-[#566166] dark:text-[#a9b4b9] px-4 py-2 font-['Lexend'] tracking-tight font-medium hover:scale-105 transition-transform duration-300" href="#">Assembly</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#566166] hover:scale-105 transition-transform" data-icon="settings">settings</button>
+<button class="material-symbols-outlined text-[#566166] hover:scale-105 transition-transform" data-icon="help">help</button>
+</div>
+</nav>
+<!-- Main Workspace Canvas -->
+<main class="pt-32 px-8 max-w-[1600px] mx-auto grid grid-cols-12 gap-8">
+<!-- Left Panel: Source Editor -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="flex items-center justify-between px-4">
+<h2 class="text-on-surface-variant font-bold text-xl tracking-tight">Main.ae</h2>
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error/20"></div>
+<div class="w-3 h-3 rounded-full bg-primary/20"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest inner-shadow-recessed rounded-lg p-8 min-h-[600px] font-mono leading-relaxed relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed opacity-30"></div>
+<div class="space-y-1">
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">1</span> <span class="text-secondary">fn</span> <span class="text-primary font-bold">compute_gravity</span>(mass: <span class="text-tertiary">f64</span>) {</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">2</span> <span class="ml-6 text-secondary">let</span> constant = <span class="text-on-tertiary-container">9.806</span>;</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">3</span> <span class="ml-6 text-secondary">return</span> mass * constant;</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">4</span> }</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">5</span></p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">6</span> <span class="text-secondary">entry</span> {</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">7</span> <span class="ml-6 text-secondary">let</span> result = compute_gravity(<span class="text-on-tertiary-container">75.0</span>);</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">8</span> <span class="ml-6 text-primary font-bold">print</span>(result);</p>
+<p class="flex gap-4"><span class="text-outline-variant select-none w-6">9</span> }</p>
+</div>
+<!-- Interaction Floating Action -->
+<button class="absolute bottom-6 right-6 bg-primary text-on-primary px-8 py-4 rounded-full clay-card flex items-center gap-3 font-bold hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+                    Compile Stream
+                </button>
+</div>
+</section>
+<!-- Right Panel: Visualization Canvas -->
+<section class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<div class="flex items-center justify-between px-4">
+<h2 class="text-on-surface-variant font-bold text-xl tracking-tight">Abstract Syntax Tree</h2>
+<div class="flex items-center gap-4">
+<span class="text-sm text-outline-variant uppercase tracking-widest font-bold">Zoom: 100%</span>
+<button class="w-10 h-10 rounded-full bg-surface-container-high inner-shadow-clay flex items-center justify-center material-symbols-outlined" data-icon="zoom_in">zoom_in</button>
+</div>
+</div>
+<div class="bg-surface-container-low inner-shadow-recessed rounded-xl p-12 min-h-[600px] relative overflow-hidden">
+<!-- Decorative Grid Pattern -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#2a3439 1px, transparent 1px); background-size: 24px 24px;"></div>
+<!-- AST Tree Visualization (Asymmetric Layout) -->
+<div class="relative flex flex-col items-center gap-16">
+<!-- Root Node -->
+<div class="w-48 h-20 bg-primary-container text-on-primary-container flex items-center justify-center rounded-xl clay-card font-bold z-10">
+                        Program_Root
+                    </div>
+<!-- Level 2 -->
+<div class="flex gap-32 relative">
+<!-- Connecting Pipes -->
+<div class="absolute -top-16 left-1/2 -translate-x-1/2 w-[80%] h-16 border-x-8 border-t-8 border-surface-dim rounded-t-3xl opacity-40"></div>
+<div class="flex flex-col items-center gap-8">
+<div class="w-40 h-16 bg-surface-container-highest text-primary flex items-center justify-center rounded-lg clay-card font-medium">
+                                Function_Decl
+                            </div>
+<!-- Level 3 Details -->
+<div class="flex flex-wrap justify-center gap-3 max-w-[200px]">
+<span class="clay-chip bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-md text-xs font-bold">NAME: "compute"</span>
+<span class="clay-chip bg-tertiary-container text-on-tertiary-container px-4 py-1.5 rounded-md text-xs font-bold">TYPE: f64</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-8 translate-y-12">
+<div class="w-40 h-16 bg-surface-container-highest text-primary flex items-center justify-center rounded-lg clay-card font-medium">
+                                Entry_Block
+                            </div>
+<div class="w-48 p-4 bg-surface-container-lowest rounded-lg clay-card">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="text-[10px] uppercase tracking-tighter font-black text-outline">Call Stack</span>
+</div>
+<div class="space-y-2">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-1/2"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Metadata Bento Piece -->
+<div class="absolute bottom-4 right-4 w-64 p-6 bg-surface-container-highest/60 backdrop-blur-md rounded-lg clay-card">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Node Properties</p>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-outline">ID</span>
+<span class="font-mono text-primary">#0xFA22</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-outline">Complexity</span>
+<span class="font-mono text-tertiary">O(log n)</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-outline">Mem Offset</span>
+<span class="font-mono text-secondary">128kb</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-center items-center h-24 gap-12 bg-[#eef4f9]/80 dark:bg-[#1a1c1e]/80 backdrop-blur-xl shadow-[inset_0px_6px_12px_rgba(0,0,0,0.05)] rounded-t-[3rem]">
+<button class="flex items-center gap-2 bg-[#d9e4ea] dark:bg-[#2d3133] px-8 py-3 rounded-full text-[#4c645b] font-bold font-['Lexend'] text-sm uppercase tracking-widest active:scale-98 transition-all">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+            Diagnostics
+        </button>
+<button class="flex items-center gap-2 text-[#566166] dark:text-[#a9b4b9] px-6 py-2 font-['Lexend'] text-sm uppercase tracking-widest hover:bg-[#d9e4ea] dark:hover:bg-[#3d4b50] transition-colors active:scale-98 transition-all">
+<span class="material-symbols-outlined" data-icon="troubleshoot">troubleshoot</span>
+            Logs
+        </button>
+<div class="absolute right-12 flex items-center gap-4">
+<div class="hidden md:block text-right">
+<p class="text-[10px] font-bold text-outline-variant uppercase">Engine Status</p>
+<p class="text-xs font-bold text-primary">READY_FOR_LINT</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-primary-dim shadow-inner">
+<span class="material-symbols-outlined" data-icon="bolt" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+</div>
+</nav>
+<!-- Mini Profile / Engine Controller -->
+<div class="fixed top-24 right-8 z-40 flex flex-col gap-4">
+<div class="p-2 bg-surface-container-highest rounded-full clay-card flex flex-col gap-2">
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="folder_open">folder_open</span>
+</button>
+</div>
+</div>
+</body></html>

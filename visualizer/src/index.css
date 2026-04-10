@@ -21,15 +21,11 @@
 @layer base {
   body {
     @apply bg-surface text-on-surface overflow-hidden antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
   }
 
-  h1, h2, h3, .font-display {
-    font-family: 'Space Grotesk', sans-serif;
-  }
-
-  code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+  h1, h2, h3, .font-display, code, pre, .font-mono {
+    font-family: 'Lexend', sans-serif !important;
   }
 }
 
