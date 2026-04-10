@@ -73,11 +73,15 @@ export function transformAST(ast: any): GraphData {
 
   // Dagre Layout Calculation
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 100 });
+  g.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 120 });
   g.setDefaultEdgeLabel(() => ({}));
 
   nodes.forEach(node => {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+    const propCount = Object.keys(node.data.properties || {}).length;
+    const dynamicHeight = 60 + (propCount * 25);
+    // Store height in data for component use if needed, but primarily for dagre
+    node.data.height = dynamicHeight;
+    g.setNode(node.id, { width: NODE_WIDTH, height: dynamicHeight });
   });
 
   edges.forEach(edge => {
@@ -89,11 +93,12 @@ export function transformAST(ast: any): GraphData {
   // Apply dagre positions to React Flow nodes
   const layoutedNodes = nodes.map(node => {
     const nodeWithPos = g.node(node.id);
+    const nodeHeight = node.data.height;
     return {
       ...node,
       position: {
         x: nodeWithPos.x - NODE_WIDTH / 2,
-        y: nodeWithPos.y - NODE_HEIGHT / 2
+        y: nodeWithPos.y - nodeHeight / 2
       }
     };
   });
