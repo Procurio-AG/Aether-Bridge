@@ -274,17 +274,17 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen w-full font-body celestial-bg text-on-surface overflow-hidden">
+    <div className="flex h-screen w-full font-body bg-surface text-on-surface overflow-hidden">
         {/* Main Workspace */}
         <main className="flex-1 flex flex-col min-w-0 relative">
-            {/* TopAppBar - Now includes Stage Selection */}
-            <header className="bg-surface-container flex flex-col w-full shrink-0 border-b border-white/[0.02] shadow-2xl z-20">
+            {/* TopAppBar - Tactile Pill Structure */}
+            <header className="bg-surface-container flex flex-col w-full shrink-0 border-b border-[#2a3439]/5 z-20">
                 <div className="flex justify-between items-center px-8 py-3">
                     <div className="flex items-center gap-6">
-                        <h1 className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container tracking-tighter">Aether</h1>
+                        <h1 className="text-xl font-display font-black text-primary tracking-tighter">Aether</h1>
                         
                         {/* Integrated Stage Selection */}
-                        <div className="flex items-center gap-1 py-1 px-1 rounded-full bg-surface-dim/40 border border-white/5 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none">
+                        <div className="flex items-center gap-1.5 py-1.5 px-2 rounded-full bg-surface-dim/20 border border-white/40 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]">
                             {STAGES.map((stage, idx) => {
                                 const isActive = activeStageIdx === idx;
                                 const hasCompiledData = lastResult !== null;
@@ -295,16 +295,16 @@ function App() {
                                         key={stage}
                                         onClick={() => setActiveStageIdx(idx)}
                                         disabled={disabled}
-                                        className={`flex items-center gap-2 px-4 py-1.5 transition-all duration-300 rounded-full shrink-0
+                                        className={`flex items-center gap-2 px-5 py-2 transition-all duration-400 rounded-full shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.05em]
                                           ${isActive 
-                                            ? 'bg-primary/10 text-primary ambient-bloom' 
-                                            : 'text-on-surface-variant/60 hover:text-primary hover:bg-white/5'
+                                            ? 'bg-primary text-white shadow-[2px_2px_8px_rgba(76,100,91,0.2),inset_2px_2px_4px_rgba(255,255,255,0.3)]' 
+                                            : 'text-on-surface-variant/60 hover:text-primary hover:bg-white/60'
                                           }
                                           ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
                                         `}
                                     >
                                         <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
-                                        <span className="font-display text-[9px] uppercase tracking-[0.1em] font-bold whitespace-nowrap">{stage}</span>
+                                        <span className="whitespace-nowrap">{stage}</span>
                                     </button>
                                 )
                             })}
@@ -326,10 +326,10 @@ function App() {
                         <button 
                             onClick={handleCompile}
                             disabled={isCompiling || isWasmLoading}
-                            className="bg-gradient-to-r from-primary to-primary-container text-[#101b8a] font-display font-bold px-6 py-1.5 rounded-full text-[10px] tracking-widest ambient-bloom hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer active:scale-95"
+                            className="bg-primary text-white font-display font-bold px-8 py-2.5 rounded-full text-[10px] tracking-widest shadow-[0_10px_20px_rgba(76,100,91,0.15),inset_2px_2px_4px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                         >
                             {isCompiling || isWasmLoading ? (
-                                <><div className="w-3.5 h-3.5 rounded-full border-2 border-[#101b8a] border-t-transparent animate-spin"></div></>
+                                <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/60 border-t-transparent animate-spin"></div></>
                             ) : <span className="material-symbols-outlined text-sm">bolt</span>}
                             <span>{isWasmLoading ? "INITIALIZING..." : "COMPILE"}</span>
                         </button>
@@ -343,12 +343,12 @@ function App() {
                 <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
                     
                     {/* Source Editor Panel */}
-                    <section className="col-span-12 lg:col-span-6 flex flex-col no-line-card overflow-hidden shadow-2xl border border-white/[0.02]">
-                        <div className="px-5 py-3 flex items-center justify-between bg-surface-container-high/40">
-                            <span className="font-display text-[10px] uppercase font-bold tracking-[0.2em] text-primary">Source: Main.ae</span>
+                    <section className="col-span-12 lg:col-span-6 flex flex-col clay-card overflow-hidden">
+                        <div className="px-6 py-4 flex items-center justify-between border-b border-[#2a3439]/5">
+                            <span className="font-display text-[10px] uppercase font-bold tracking-[0.2em] text-primary-dim">Input // Main.ae</span>
                             <span className="material-symbols-outlined text-on-surface-variant text-sm opacity-40">edit_note</span>
                         </div>
-                        <div className="flex-1 relative bg-surface-dim/30">
+                        <div className="flex-1 relative bg-white/40">
                             <SourceEditor
                               defaultValue={DEFAULT_CODE}
                               onChange={setCode}
@@ -357,11 +357,11 @@ function App() {
                     </section>
                     
                     {/* Visualization Panel */}
-                    <section className="col-span-12 lg:col-span-6 flex flex-col no-line-card overflow-hidden shadow-2xl border border-white/[0.02]">
-                        <div className="px-5 py-3 flex items-center justify-between bg-surface-container-high/40 border-b border-white/[0.01]">
+                    <section className="col-span-12 lg:col-span-6 flex flex-col clay-card overflow-hidden">
+                        <div className="px-6 py-4 flex items-center justify-between border-b border-[#2a3439]/5">
                             <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${lastResult?.error ? 'bg-error' : 'bg-primary'}`}></div>
-                                <span className="font-display font-bold text-[10px] tracking-[0.15em] uppercase text-on-surface-variant text-sm tracking-tight">{STAGE_ICONS[activeStage].toUpperCase()} / {activeStage.toUpperCase()}</span>
+                                <div className={`w-2.5 h-2.5 rounded-full ${lastResult?.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary opacity-40'}`}></div>
+                                <span className="font-display font-black text-[10px] tracking-[0.15em] uppercase text-on-surface-variant">{activeStage}</span>
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => { setAstIsExpanded(true); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Expand All AST Branches">
@@ -390,24 +390,24 @@ function App() {
                     <div className="w-12 h-1 rounded-full bg-outline-variant/30 group-hover:bg-primary/60 transition-colors"></div>
                 </div>
 
-                {/* Compilation Logs Footer - Now Resizable */}
+                {/* Compilation Logs Footer - Recessed Well */}
                 <section 
                     style={{ height: `${logsHeight}px` }}
-                    className="no-line-card flex flex-col overflow-hidden shrink-0 relative border border-white/[0.02] shadow-2xl"
+                    className="clay-well flex flex-col overflow-hidden shrink-0 relative"
                 >
-                    <div className="px-5 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-white/[0.01]">
-                        <div className="flex items-center gap-4">
-                            <span className="font-display text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Diagnostics & Logs</span>
+                    <div className="px-6 py-3 flex items-center justify-between border-b border-[#2a3439]/5">
+                        <div className="flex items-center gap-5">
+                            <span className="font-display text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Diagnostics Hub</span>
                             <div className="flex items-center gap-2">
-                                <span className={`flex h-1.5 w-1.5 rounded-full ${lastResult ? (lastResult.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary shadow-[0_0_8px_rgba(189,194,255,0.4)]') : 'bg-outline-variant'}`}></span>
+                                <span className={`flex h-2 w-2 rounded-full ${lastResult ? (lastResult.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary opacity-60') : 'bg-outline-variant'}`}></span>
                                 <span className={`text-[9px] font-display font-black tracking-widest ${lastResult ? (lastResult.error ? 'text-error' : 'text-primary') : 'text-outline-variant'}`}>
-                                    {lastResult ? (lastResult.error ? 'HALTED' : 'READY') : 'IDLE'}
+                                    {lastResult ? (lastResult.error ? 'INTERRUPTED' : 'SUCCESS') : 'IDLE'}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 text-[9px] font-mono text-outline-variant">
-                            <span className={lastResult?.bag?.hasErrors ? "text-error font-bold" : ""}>ERR: {lastResult?.bag?.hasErrors ? lastResult.bag.diagnostics.length : 0}</span>
-                            <span className="material-symbols-outlined text-xs cursor-pointer hover:text-on-surface">filter_list</span>
+                        <div className="flex items-center gap-4 text-[9px] font-mono text-on-surface-variant/40 uppercase tracking-tighter">
+                            <span>Tokens: {lastResult?.tokens?.length || 0}</span>
+                            <span className="material-symbols-outlined text-xs cursor-pointer hover:text-on-surface transition-colors">settings_input_component</span>
                         </div>
                     </div>
                     <div className="flex-1 p-3 font-mono text-[10px] leading-relaxed overflow-y-auto bg-surface-container-lowest/20 flex flex-col gap-0.5">

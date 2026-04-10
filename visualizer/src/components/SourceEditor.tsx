@@ -29,12 +29,37 @@ export const SourceEditor = memo(({ defaultValue, onChange }: SourceEditorProps)
         };
     }, []);
 
+    const handleEditorDidMount = (editor: any, monaco: any) => {
+        monaco.editor.defineTheme('clay-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '999da0', fontStyle: 'italic' },
+                { token: 'keyword', foreground: '4c645b', fontStyle: 'bold' },
+                { token: 'string', foreground: '65597c' },
+                { token: 'number', foreground: 'a83836' },
+                { token: 'type', foreground: '50616d' },
+            ],
+            colors: {
+                'editor.background': '#f6fafd00', // Transparent to show container
+                'editor.lineHighlightBackground': '#e7eff466',
+                'editorLineNumber.foreground': '#56616644',
+                'editorLineNumber.activeForeground': '#4c645b',
+                'editorIndentGuide.background': '#dfe1e5',
+                'editorIndentGuide.activeBackground': '#4c645b88',
+                'editor.selectionBackground': '#cde9dc88',
+            }
+        });
+        monaco.editor.setTheme('clay-light');
+    };
+
     return (
         <Editor
             height="100%"
             defaultLanguage="javascript" // Aether-lang closer to JS syntax for highlighting
-            theme="vs-dark"
+            theme="clay-light"
             defaultValue={defaultValue}
+            onMount={handleEditorDidMount}
             onChange={handleEditorChange}
             options={{
                 minimap: { enabled: false },

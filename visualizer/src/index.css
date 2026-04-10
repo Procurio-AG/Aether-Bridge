@@ -5,21 +5,22 @@
 @tailwind utilities;
 
 :root {
-  --surface-dim: #0f131c;
-  --surface-container: #1c1f29;
-  --surface-container-high: #262a34;
-  --surface-container-highest: #31353f;
-  --primary: #bdc2ff;
-  --primary-container: #818cf8;
-  --accent-glow: rgba(129, 140, 248, 0.25);
-  --outline-variant: rgba(144, 143, 158, 0.15);
-  --on-surface: #dfe2ef;
-  --on-surface-variant: #c6c5d5;
+  --surface: #f6fafd;
+  --surface-container: #e7eff4;
+  --surface-container-high: #e1e9ef;
+  --surface-container-highest: #d9e4ea;
+  --on-surface: #2a3439;
+  --on-surface-variant: #566166;
+  --primary: #4c645b;
+  --primary-container: #cde9dc;
+  --secondary: #65597c;
+  --secondary-container: #eaddff;
+  --outline-variant: rgba(169, 180, 185, 0.15);
 }
 
 @layer base {
   body {
-    @apply bg-[#0f131c] text-on-surface overflow-hidden antialiased;
+    @apply bg-surface text-on-surface overflow-hidden antialiased;
     font-family: 'Inter', sans-serif;
   }
 
@@ -33,27 +34,34 @@
 }
 
 @layer utilities {
-  .celestial-bg {
-    background: radial-gradient(circle at 50% -20%, #1c1f29, #0f131c 80%);
+  .clay-card {
+    @apply bg-surface-container-highest rounded-[32px] transition-all duration-300;
+    box-shadow: 
+        0 20px 40px rgba(42, 52, 57, 0.06),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.7),
+        inset -4px -4px 8px rgba(169, 180, 185, 0.25);
+  }
+
+  .clay-well {
+    @apply bg-[#e9eff2] rounded-[24px] transition-all duration-300;
+    box-shadow: 
+        inset 6px 6px 12px rgba(0, 0, 0, 0.06),
+        inset -6px -6px 12px rgba(255, 255, 255, 0.4);
   }
 
   .ambient-bloom {
-    box-shadow: 0 0 30px rgba(129, 140, 248, 0.15), 0 0 60px rgba(129, 140, 248, 0.05);
-  }
-
-  .no-line-card {
-    @apply bg-surface-container rounded-xl transition-all duration-300;
+    box-shadow: 0 0 30px rgba(76, 100, 91, 0.1), 0 0 60px rgba(76, 100, 91, 0.05);
   }
 
   .glass-panel {
-    background: rgba(17, 24, 39, 0.7);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
   }
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(144, 143, 158, 0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(169, 180, 185, 0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 #root {
