@@ -274,154 +274,138 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen w-full font-body bg-surface text-on-surface overflow-hidden">
-        {/* Main Workspace */}
-        <main className="flex-1 flex flex-col min-w-0 relative">
-            {/* TopAppBar - Tactile Pill Structure */}
-            <header className="bg-surface-container flex flex-col w-full shrink-0 border-b border-[#2a3439]/5 z-20">
-                <div className="flex justify-between items-center px-8 py-3">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-xl font-display font-black text-primary tracking-tighter">Aether</h1>
-                        
-                        {/* Integrated Stage Selection */}
-                        <div className="flex items-center gap-1.5 py-1.5 px-2 rounded-full bg-surface-dim/20 border border-white/40 ml-4 overflow-x-auto scrollbar-hide max-w-[40vw] sm:max-w-none shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]">
-                            {STAGES.map((stage, idx) => {
-                                const isActive = activeStageIdx === idx;
-                                const hasCompiledData = lastResult !== null;
-                                const disabled = !hasCompiledData || (lastResult.error && idx > 0);
+    <div className="flex min-h-screen w-full font-body bg-surface text-on-surface overflow-x-hidden">
+        {/* Navigation Island - Floating Tactile Pill */}
+        <header className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50 pointer-events-none">
+            <div className="w-full bg-white/70 backdrop-blur-xl rounded-full clay-card px-8 py-3 flex justify-between items-center pointer-events-auto border border-white/40 shadow-2xl">
+                <div className="flex items-center gap-6">
+                    <h1 className="text-sm font-black text-primary uppercase tracking-[0.2em]">Tactile Logic Engine</h1>
+                    
+                    {/* Stage Pills - Tight Horizontal Center */}
+                    <div className="hidden md:flex items-center gap-1 p-1 rounded-full bg-[#e7eff4] inner-shadow-recessed ml-8 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]">
+                        {STAGES.map((stage, idx) => {
+                            const isActive = activeStageIdx === idx;
+                            const hasCompiledData = lastResult !== null;
+                            const disabled = !hasCompiledData && idx > 0;
 
-                                return (
-                                    <button 
-                                        key={stage}
-                                        onClick={() => setActiveStageIdx(idx)}
-                                        disabled={disabled}
-                                        className={`flex items-center gap-2 px-5 py-2 transition-all duration-400 rounded-full shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.05em]
-                                          ${isActive 
-                                            ? 'bg-primary text-white shadow-[2px_2px_8px_rgba(76,100,91,0.2),inset_2px_2px_4px_rgba(255,255,255,0.3)]' 
-                                            : 'text-on-surface-variant/60 hover:text-primary hover:bg-white/60'
-                                          }
-                                          ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
-                                        `}
-                                    >
-                                        <span className="material-symbols-outlined text-[16px]">{STAGE_ICONS[stage]}</span>
-                                        <span className="whitespace-nowrap">{stage}</span>
-                                    </button>
-                                )
-                            })}
+                            return (
+                                <button 
+                                    key={stage}
+                                    onClick={() => setActiveStageIdx(idx)}
+                                    disabled={disabled}
+                                    title={stage}
+                                    className={`flex items-center justify-center p-2.5 transition-all duration-400 rounded-full shrink-0
+                                      ${isActive 
+                                        ? 'bg-primary text-white shadow-lg scale-110' 
+                                        : 'text-on-surface-variant/40 hover:text-primary'
+                                      }
+                                      ${disabled ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}
+                                    `}
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">{STAGE_ICONS[stage]}</span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                    <div className="hidden lg:flex items-center gap-2 mr-6 text-[10px] uppercase font-bold tracking-widest text-outline-variant">
+                        <span>L: {activeStage.split(' ')[0]}</span>
+                        <span className="opacity-20">/</span>
+                        <span>Arch: x64_86</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-outline-variant hover:text-primary transition-colors cursor-pointer text-xl">settings</span>
+                        <span className="material-symbols-outlined text-outline-variant hover:text-primary transition-colors cursor-pointer text-xl">help_outline</span>
+                        <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-primary inner-shadow-clay ml-2">AD</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {/* Floating Compilation FAB */}
+        <button 
+            onClick={handleCompile}
+            disabled={isCompiling || isWasmLoading}
+            className="fixed bottom-32 right-12 z-40 bg-primary text-white px-10 py-5 rounded-full clay-card font-bold shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 cursor-pointer group"
+        >
+            {isCompiling || isWasmLoading ? (
+                <div className="w-5 h-5 rounded-full border-3 border-white/60 border-t-transparent animate-spin"></div>
+            ) : <span className="material-symbols-outlined text-2xl font-black group-hover:rotate-12 transition-transform">bolt</span>}
+            <span className="tracking-[0.2em] text-sm">{isWasmLoading ? "SYNCING..." : "COMPILE SOURCE"}</span>
+        </button>
+
+        {/* Main Canvas - 12-Column Editorial Grid */}
+        <main className="flex-1 w-full max-w-[1700px] mx-auto pt-28 pb-32 px-8 flex flex-col gap-8">
+            
+            <div className="grid grid-cols-12 gap-8 w-full flex-1 min-h-[600px]">
+                {/* Source Editor Panel - Left Island */}
+                <section className="col-span-12 lg:col-span-6 flex flex-col clay-card bg-white rounded-2xl overflow-hidden ring-1 ring-black/[0.02]">
+                    <div className="px-8 py-5 flex items-center justify-between border-b border-black/[0.03] bg-surface-bright/50">
+                        <span className="text-[10px] uppercase font-black tracking-[0.25em] text-primary/60">Input Architecture // Main.ae</span>
+                        <span className="text-[9px] text-outline-variant font-mono">LEXEND-UTF8</span>
+                    </div>
+                    <div className="flex-1 relative">
+                        <SourceEditor
+                          defaultValue={DEFAULT_CODE}
+                          onChange={setCode}
+                        />
+                    </div>
+                </section>
+                
+                {/* Visualization Panel - Right Island */}
+                <section className="col-span-12 lg:col-span-6 flex flex-col clay-card bg-white rounded-2xl overflow-hidden ring-1 ring-black/[0.02]">
+                    <div className="px-8 py-5 flex items-center justify-between border-b border-black/[0.03] bg-surface-bright/50">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-2.5 h-2.5 rounded-full ${lastResult?.error ? 'bg-error' : 'bg-primary opacity-40'}`}></div>
+                            <span className="text-[10px] font-black tracking-[0.25em] uppercase text-primary">{activeStage}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => { setAstIsExpanded(true); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded-lg bg-surface-container-highest/30 text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                                <span className="material-symbols-outlined text-lg">unfold_more</span>
+                            </button>
+                            <button onClick={() => { setAstIsExpanded(false); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded-lg bg-surface-container-highest/30 text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                                <span className="material-symbols-outlined text-lg">unfold_less</span>
+                            </button>
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                        <div className="hidden lg:flex items-center gap-4 py-1 px-3 rounded-full bg-surface-container-highest/10 border border-white/5 mr-4">
-                            <div className="flex items-center gap-2 pr-4 border-r border-white/10">
-                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Arch</span>
-                                <span className="text-[10px] font-mono text-secondary-fixed">x86-64</span>
-                            </div>
-                            <div className="flex items-center gap-2 pl-2">
-                                <span className="text-[9px] text-on-surface-variant font-label uppercase tracking-widest font-bold">Stack</span>
-                                <span className="text-[10px] font-mono text-primary-fixed">{lastResult?.totalFrameSize ?? 0} B</span>
-                            </div>
-                        </div>
-
-                        <button 
-                            onClick={handleCompile}
-                            disabled={isCompiling || isWasmLoading}
-                            className="bg-primary text-white font-display font-bold px-8 py-2.5 rounded-full text-[10px] tracking-widest shadow-[0_10px_20px_rgba(76,100,91,0.15),inset_2px_2px_4px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-                        >
-                            {isCompiling || isWasmLoading ? (
-                                <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/60 border-t-transparent animate-spin"></div></>
-                            ) : <span className="material-symbols-outlined text-sm">bolt</span>}
-                            <span>{isWasmLoading ? "INITIALIZING..." : "COMPILE"}</span>
-                        </button>
+                    <div className="flex-1 bg-[#f6fafd] relative overflow-hidden">
+                        {/* Tactile Data Grid Pattern */}
+                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4c645b 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+                        {renderActiveStageData()}
                     </div>
-                </div>
-            </header>
+                </section>
 
-            {/* Dynamic Content Canvas */}
-            <div className="flex-1 flex flex-col p-6 gap-6 overflow-hidden">
-                {/* Bento Grid - Upper Section */}
-                <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
-                    
-                    {/* Source Editor Panel */}
-                    <section className="col-span-12 lg:col-span-6 flex flex-col clay-card overflow-hidden">
-                        <div className="px-6 py-4 flex items-center justify-between border-b border-[#2a3439]/5">
-                            <span className="font-display text-[10px] uppercase font-bold tracking-[0.2em] text-primary-dim">Input // Main.ae</span>
-                            <span className="material-symbols-outlined text-on-surface-variant text-sm opacity-40">edit_note</span>
-                        </div>
-                        <div className="flex-1 relative bg-white/40">
-                            <SourceEditor
-                              defaultValue={DEFAULT_CODE}
-                              onChange={setCode}
-                            />
-                        </div>
-                    </section>
-                    
-                    {/* Visualization Panel */}
-                    <section className="col-span-12 lg:col-span-6 flex flex-col clay-card overflow-hidden">
-                        <div className="px-6 py-4 flex items-center justify-between border-b border-[#2a3439]/5">
+                {/* Diagnostics Hub - Full Width Footer */}
+                <section className="col-span-12 flex flex-col clay-card bg-[#d9e4ea]/30 rounded-2xl overflow-hidden min-h-[160px]">
+                    <div className="px-8 py-4 flex items-center justify-between border-b border-black/[0.03]">
+                        <div className="flex items-center gap-6">
+                            <span className="text-[10px] uppercase tracking-[0.3em] font-black text-primary/40">Diagnostics Pipeline</span>
                             <div className="flex items-center gap-2">
-                                <div className={`w-2.5 h-2.5 rounded-full ${lastResult?.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary opacity-40'}`}></div>
-                                <span className="font-display font-black text-[10px] tracking-[0.15em] uppercase text-on-surface-variant">{activeStage}</span>
-                            </div>
-                            <div className="flex gap-2">
-                                <button onClick={() => { setAstIsExpanded(true); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Expand All AST Branches">
-                                    <span className="material-symbols-outlined text-lg">unfold_more</span>
-                                </button>
-                                <button onClick={() => { setAstIsExpanded(false); setAstExpandToggle(t => t + 1); }} className="p-1.5 rounded bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Collapse All AST Branches">
-                                    <span className="material-symbols-outlined text-lg">unfold_less</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div className="flex-1 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-surface-container-high/50 via-surface-container to-surface-container relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#464753 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }}></div>
-                            {renderActiveStageData()}
-                        </div>
-                    </section>
-                </div>
-
-                {/* Resizer Handle */}
-                <div 
-                    onMouseDown={startResizing}
-                    className={`h-1.5 w-full cursor-row-resize transition-colors shrink-0 flex items-center justify-center group
-                        ${isResizing ? 'bg-primary' : 'bg-transparent hover:bg-primary/40'}
-                    `}
-                >
-                    <div className="w-12 h-1 rounded-full bg-outline-variant/30 group-hover:bg-primary/60 transition-colors"></div>
-                </div>
-
-                {/* Compilation Logs Footer - Recessed Well */}
-                <section 
-                    style={{ height: `${logsHeight}px` }}
-                    className="clay-well flex flex-col overflow-hidden shrink-0 relative"
-                >
-                    <div className="px-6 py-3 flex items-center justify-between border-b border-[#2a3439]/5">
-                        <div className="flex items-center gap-5">
-                            <span className="font-display text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Diagnostics Hub</span>
-                            <div className="flex items-center gap-2">
-                                <span className={`flex h-2 w-2 rounded-full ${lastResult ? (lastResult.error ? 'bg-error shadow-[0_0_8px_rgba(255,107,107,0.4)]' : 'bg-primary opacity-60') : 'bg-outline-variant'}`}></span>
-                                <span className={`text-[9px] font-display font-black tracking-widest ${lastResult ? (lastResult.error ? 'text-error' : 'text-primary') : 'text-outline-variant'}`}>
-                                    {lastResult ? (lastResult.error ? 'INTERRUPTED' : 'SUCCESS') : 'IDLE'}
+                                <span className={`w-2 h-2 rounded-full ${lastResult ? (lastResult.error ? 'bg-error animate-pulse' : 'bg-primary') : 'bg-outline-variant'}`}></span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-primary">
+                                    {lastResult ? (lastResult.error ? 'Stopped' : 'Verified') : 'Standby'}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 text-[9px] font-mono text-on-surface-variant/40 uppercase tracking-tighter">
+                        <div className="flex items-center gap-6 text-[9px] font-bold text-outline-variant uppercase tracking-widest">
                             <span>Tokens: {lastResult?.tokens?.length || 0}</span>
-                            <span className="material-symbols-outlined text-xs cursor-pointer hover:text-on-surface transition-colors">settings_input_component</span>
+                            <span>Memory: {wasmInstance ? 'WASM_INIT' : 'OFFLINE'}</span>
                         </div>
                     </div>
-                    <div className="flex-1 p-3 font-mono text-[10px] leading-relaxed overflow-y-auto bg-surface-container-lowest/20 flex flex-col gap-0.5">
+                    <div className="flex-1 p-6 font-mono text-[11px] leading-relaxed overflow-y-auto bg-white/40">
                         {logs.map((log, i) => {
-                           let colorClass = "text-on-surface-variant/50";
-                           if (log.includes("INFO")) colorClass = "text-secondary";
-                           else if (log.includes("DEBUG")) colorClass = "text-primary";
-                           else if (log.includes("TRACE")) colorClass = "text-tertiary";
+                           let colorClass = "text-on-surface-variant/60";
+                           if (log.includes("INFO")) colorClass = "text-[#4c645b]";
+                           else if (log.includes("DEBUG")) colorClass = "text-secondary";
                            else if (log.includes("ERROR")) colorClass = "text-error font-bold";
                            
-                           return <p key={i} className={colorClass}>{log}</p>;
+                           return <p key={i} className={`mb-1 ${colorClass}`}>{log}</p>;
                         })}
                         {lastResult?.bag?.diagnostics?.map((diag: any, i: number) => (
-                           <p key={`diag-${i}`} className="text-error font-bold ml-3">► [L{diag.line}:{diag.column}] {diag.message}</p>
+                           <p key={`diag-${i}`} className="text-error font-bold ml-4 mb-1">► [L{diag.line}:{diag.column}] {diag.message}</p>
                         ))}
                     </div>
                 </section>

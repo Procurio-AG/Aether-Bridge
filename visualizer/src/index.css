@@ -1,13 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;500;700&family=JetBrains+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --surface: #f6fafd;
-  --surface-container: #e7eff4;
-  --surface-container-high: #e1e9ef;
   --primary: #4c645b;
   --surface-container-highest: #d9e4ea;
   --surface-bright: #f6fafd;
@@ -17,7 +14,8 @@
 
 @layer base {
   body {
-    @apply bg-surface text-on-surface overflow-hidden antialiased;
+    background-color: #f6fafd !important;
+    @apply text-on-surface antialiased;
     font-family: 'Lexend', sans-serif;
   }
 
@@ -27,9 +25,8 @@
 }
 
 @layer utilities {
-  .clay-card {
-    box-shadow: 0px 20px 40px rgba(42, 52, 57, 0.08),
-                inset 4px 4px 8px rgba(255, 255, 255, 0.5),
+  .inner-shadow-clay {
+    box-shadow: inset 4px 4px 8px rgba(255, 255, 255, 0.5), 
                 inset -4px -4px 8px rgba(169, 180, 185, 0.3);
   }
 
@@ -37,10 +34,10 @@
     box-shadow: inset 6px 6px 12px rgba(0, 0, 0, 0.05);
   }
 
-  .pipeline-pipe {
-    height: 8px;
-    background: #d1dce2;
-    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.05);
+  .clay-card {
+    box-shadow: 0px 20px 40px rgba(42, 52, 57, 0.08),
+                inset 4px 4px 8px rgba(255, 255, 255, 0.5),
+                inset -4px -4px 8px rgba(169, 180, 185, 0.3);
   }
 }
 
@@ -50,5 +47,5 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 #root {
-  @apply h-screen w-screen flex flex-col;
+  @apply min-h-screen w-full flex flex-col overflow-x-hidden;
 }
